@@ -1,9 +1,9 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 
-import BottomBar from "../bottombar/bottombar";
-import Header from "../header/header";
-import MainContents from "../maincontents/maincontents";
+import BottomBar from "../../components/bottombar/bottombar";
+import Header from "../../components/header/header";
+import MainContents from "../../components/maincontents/maincontents";
 
 export default function HomeScreen() {
   return (
