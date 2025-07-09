@@ -23,7 +23,13 @@ export default function Header() {
   if (!fontsLoaded) return null;
 
   return (
-    <View style={{ flex: 0.35, backgroundColor: "white" }}>
+    <View
+      style={{
+        width: "100%", // 좌우는 부모 기준으로 가득
+        height: 180,
+        backgroundColor: "white",
+      }}
+    >
       {/* 헤더 영역 */}
       <View
         style={{
@@ -56,14 +62,11 @@ export default function Header() {
         />
       </View>
 
-      {/* 탭 바 */}
+      {/* 탭 바 (크기 고정) */}
       <View
         style={{
-          position: "absolute",
-          top: 116, // 헤더 바로 아래 위치
-          left: 0,
-          right: 0,
-          zIndex: 10,
+          width: "100%", // 좌우는 부모 기준으로 가득
+          height: 50, // 상하는 고정 (원하는 값으로 조정)
           backgroundColor: "#ffffff",
           borderBottomWidth: 1,
           borderBottomColor: "#bababa",
