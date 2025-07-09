@@ -3,10 +3,15 @@ import React, { useState } from "react";
 import { Image, TouchableOpacity, View } from "react-native";
 
 export default function BottomBar() {
-  const [fontsLoaded] = useFonts({
-    "Inter-Light": require("../../assets/fonts/Inter-Light.ttf"),
-    "Inter-Bold": require("../../assets/fonts/Inter-Bold.ttf"),
-  });
+const [fontsLoaded] = useFonts({
+  "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
+  "Pretendard-ExtraBold": require("../../assets/fonts/Pretendard-ExtraBold.ttf"),
+  "Pretendard-ExtraLight": require("../../assets/fonts/Pretendard-ExtraLight.ttf"),
+  "Pretendard-Light": require("../../assets/fonts/Pretendard-Light.ttf"),
+  "Pretendard-Regular": require("../../assets/fonts/Pretendard-Regular.ttf"),
+  "Pretendard-SemiBold": require("../../assets/fonts/Pretendard-SemiBold.ttf"),
+});
+  
   const reverseNavItems = [
     { type: "image", src: require("../../assets/images/file-cliked-02.png") },
     {

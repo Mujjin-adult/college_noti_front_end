@@ -4,9 +4,20 @@ import { Image, ScrollView, Text, View } from "react-native";
 
 export default function MainContents() {
   const [fontsLoaded] = useFonts({
-    "Inter-Light": require("../../assets/fonts/Inter-Light.ttf"),
-    "Inter-Bold": require("../../assets/fonts/Inter-Bold.ttf"),
+    "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
+    "Pretendard-ExtraBold": require("../../assets/fonts/Pretendard-ExtraBold.ttf"),
+    "Pretendard-ExtraLight": require("../../assets/fonts/Pretendard-ExtraLight.ttf"),
+    "Pretendard-Light": require("../../assets/fonts/Pretendard-Light.ttf"),
+    "Pretendard-Regular": require("../../assets/fonts/Pretendard-Regular.ttf"),
   });
+
+  if (!fontsLoaded) return null;
+
+  const noticeTitles = [
+    "대학혁신지원사업 전공 소모임 모집 안내",
+    "INU 나노 디그리 교육과정 안내",
+    "25-2학기 파견 교환학생 선발 공고",
+  ];
 
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
@@ -20,7 +31,7 @@ export default function MainContents() {
             {/* 블록들 상단 날짜 텍스트 */}
             <Text
               style={{
-                fontFamily: "Inter-Light",
+                fontFamily: "Pretendard-Light",
                 fontSize: 12,
                 marginTop: 10,
                 marginBottom: 0,
@@ -38,11 +49,7 @@ export default function MainContents() {
                 paddingHorizontal: 15,
               }}
             >
-              {[
-                "대학혁신지원사업 전공 소모임 모집 안내",
-                "공지 2",
-                "공지 3",
-              ].map((title, i) => (
+              {noticeTitles.map((title, i) => (
                 <View
                   key={i}
                   style={{
@@ -65,9 +72,13 @@ export default function MainContents() {
                 >
                   {/* 공지 블록 안 왼쪽 텍스트 묶음 */}
                   <View>
-                    <Text style={{ fontFamily: "Inter-Light", fontSize: 15 }}>
+                    {/* ✅ 공지 제목만 Text로 분리 */}
+                    <Text
+                      style={{ fontFamily: "Pretendard-Light", fontSize: 15 }}
+                    >
                       {title}
                     </Text>
+                    {/* 날짜 */}
                     <View
                       style={{
                         flexDirection: "row",
@@ -75,18 +86,23 @@ export default function MainContents() {
                         marginTop: 6,
                       }}
                     >
-                      <Text style={{ fontFamily: "Inter-Light", fontSize: 10 }}>
+                      <Text
+                        style={{ fontFamily: "Pretendard-Light", fontSize: 10 }}
+                      >
                         2025-0{m}-28
                       </Text>
+                      {/* 태그 */}
                       <Text
                         style={{
-                          fontFamily: "Inter-Light",
-                          fontSize: 10,
+                          fontFamily: "Pretendard-Light",
+                          fontSize: 12,
                           color: "#ffffff",
                           marginLeft: 8,
                           paddingHorizontal: 4,
-                          paddingVertical: 1,
-                          borderRadius: 4,
+                          paddingTop: 1,
+                          paddingBottom: 1,
+                          lineHeight: 14,
+                          borderRadius: 5,
                           backgroundColor: "#8e8e8e",
                         }}
                       >

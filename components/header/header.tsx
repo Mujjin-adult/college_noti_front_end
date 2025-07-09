@@ -4,8 +4,11 @@ import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function Header() {
   const [fontsLoaded] = useFonts({
-    "Inter-Light": require("../../assets/fonts/Inter-Light.ttf"),
-    "Inter-Bold": require("../../assets/fonts/Inter-Bold.ttf"),
+    "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
+    "Pretendard-ExtraBold": require("../../assets/fonts/Pretendard-ExtraBold.ttf"),
+    "Pretendard-ExtraLight": require("../../assets/fonts/Pretendard-ExtraLight.ttf"),
+    "Pretendard-Light": require("../../assets/fonts/Pretendard-Light.ttf"),
+    "Pretendard-Regular": require("../../assets/fonts/Pretendard-Regular.ttf"),
   });
   const categories = [
     "학과",
@@ -25,8 +28,8 @@ export default function Header() {
   return (
     <View
       style={{
-        width: "100%", // 좌우는 부모 기준으로 가득
-        height: 180,
+        width: "100%",
+        height: 160,
         backgroundColor: "white",
       }}
     >
@@ -37,14 +40,14 @@ export default function Header() {
           alignItems: "center",
           backgroundColor: "#3366FF",
           paddingTop: 60,
-          paddingBottom: 20,
+          paddingBottom: 10,
         }}
       >
         <View style={{ flex: 1 }}>
           <Text
             style={{
               color: "#FFFFFF",
-              fontFamily: "Inter-Bold",
+              fontFamily: "Pretendard-SemiBold",
               fontSize: 30,
               textAlign: "center",
               marginLeft: 60,
@@ -56,7 +59,7 @@ export default function Header() {
         <Image
           source={require("../../assets/images/종.png")}
           style={{
-            width: 22, // 픽셀로 고정하는 게 보통 더 안정적
+            width: 22,
             height: 27,
             marginRight: 30,
           }}
@@ -66,19 +69,20 @@ export default function Header() {
       {/* 탭 바 (크기 고정) */}
       <View
         style={{
-          width: "100%", // 좌우는 부모 기준으로 가득
-          height: 50, // 상하는 고정 (원하는 값으로 조정)
+          width: "100%",
+          height: 47, // 탭 바 높이
           backgroundColor: "#ffffff",
           borderBottomWidth: 1,
           borderBottomColor: "#bababa",
         }}
       >
+        {/* 탭 바 안 카테고리 */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View
             style={{
               flexDirection: "row",
               alignItems: "center",
-              height: 50,
+              height: 50, // 내부 row
             }}
           >
             {categories.map((category) => (
@@ -97,7 +101,9 @@ export default function Header() {
                   <Text
                     style={{
                       fontFamily:
-                        selected === category ? "Inter-Bold" : "Inter-Light",
+                        selected === category
+                          ? "Pretendard-Bold"
+                          : "Pretendard-Light",
                       color: selected === category ? "black" : "#555",
                       fontSize: 16,
                     }}
