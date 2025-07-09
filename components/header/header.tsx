@@ -35,7 +35,7 @@ export default function Header() {
         style={{
           flexDirection: "row",
           alignItems: "center",
-          backgroundColor: "#bababa",
+          backgroundColor: "#3366FF",
           paddingTop: 60,
           paddingBottom: 20,
         }}
@@ -43,6 +43,7 @@ export default function Header() {
         <View style={{ flex: 1 }}>
           <Text
             style={{
+              color: "#FFFFFF",
               fontFamily: "Inter-Bold",
               fontSize: 30,
               textAlign: "center",
@@ -53,10 +54,10 @@ export default function Header() {
           </Text>
         </View>
         <Image
-          source={require("../../assets/images/noti.png")}
+          source={require("../../assets/images/종.png")}
           style={{
-            width: 30,
-            height: 30,
+            width: 22, // 픽셀로 고정하는 게 보통 더 안정적
+            height: 27,
             marginRight: 30,
           }}
         />
@@ -77,7 +78,6 @@ export default function Header() {
             style={{
               flexDirection: "row",
               alignItems: "center",
-              paddingHorizontal: 10,
               height: 50,
             }}
           >

@@ -49,7 +49,7 @@ export default function MainContents() {
                     width: "100%",
                     height: 80,
                     backgroundColor: "#ffffff",
-                    borderRadius: 10,
+                    borderRadius: 12,
                     paddingHorizontal: 20,
                     paddingVertical: 12,
                     flexDirection: "row",
