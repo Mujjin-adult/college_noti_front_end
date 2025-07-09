@@ -48,7 +48,7 @@ export default function Header() {
             style={{
               color: "#FFFFFF",
               fontFamily: "Pretendard-SemiBold",
-              fontSize: 30,
+              fontSize: 20,
               textAlign: "center",
               marginLeft: 60,
             }}
@@ -105,7 +105,7 @@ export default function Header() {
                           ? "Pretendard-Bold"
                           : "Pretendard-Light",
                       color: selected === category ? "black" : "#555",
-                      fontSize: 16,
+                      fontSize: 15,
                     }}
                   >
                     {category}
