@@ -1,7 +1,8 @@
-import { useFonts } from "expo-font";
-import React from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
-import { Image, ScrollView, Text, View, TouchableOpacity } from "react-native";
+import { useFonts } from "expo-font";
+import React, { useEffect, useState } from "react";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function MainContents() {
   const [fontsLoaded] = useFonts({
@@ -12,8 +13,6 @@ export default function MainContents() {
     "Pretendard-Regular": require("../../assets/fonts/Pretendard-Regular.ttf"),
   });
 
-  if (!fontsLoaded) return null;
-
   const noticeTitles = [
     "대학혁신지원사업 전공 소모임 모집 안내",
     "INU 나노 디그리 교육과정 안내",
@@ -21,105 +20,141 @@ export default function MainContents() {
   ];
 
   const navi = useNavigation();
+  const [readTitles, setReadTitles] = useState<string[]>([]); //이해가 안감
+
+  // 앱 시작 시 읽은 목록 불러오기
+  useEffect(() => {
+    const loadReadTitles = async () => {
+      const stored = await AsyncStorage.getItem("readTitles");
+      if (stored) {
+        setReadTitles(JSON.parse(stored));
+      }
+    };
+    loadReadTitles();
+  }, []);
+
+  // 읽은 제목 추가 + 저장
+  const handleTitlePress = async (title: string) => {
+    if (!readTitles.includes(title)) {
+      const updated = [...readTitles, title];
+      setReadTitles(updated);
+      await AsyncStorage.setItem("readTitles", JSON.stringify(updated));
+    }
+    navi.navigate("detail", { title });
+  };
+
+  if (!fontsLoaded) return null;
 
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
-      <ScrollView
-        style={{ paddingTop: 0 }}
-        contentContainerStyle={{ paddingBottom: 0 }}
-      >
-        {[6, 5, 4, 3, 2].map((m) => (
-          <View key={m} style={{ marginBottom: 0 }}>
-            <Text
-              style={{
-                fontFamily: "Pretendard-Light",
-                fontSize: 12,
-                marginTop: 10,
-                marginBottom: 0,
-                marginLeft: 15,
-              }}
-            >
-              2025-0{m}
-            </Text>
+      <ScrollView contentContainerStyle={{ paddingBottom: 0 }}>
+        {[6, 5, 4, 3, 2].map((m) => {
+          return (
+            <View key={m}>
+              <Text
+                style={{
+                  fontFamily: "Pretendard-Light",
+                  fontSize: 12,
+                  marginTop: 10,
+                  marginBottom: 0,
+                  marginLeft: 15,
+                }}
+              >
+                2025-0{m}
+              </Text>
 
-            <View
-              style={{
-                gap: 10,
-                marginTop: 10,
-                paddingHorizontal: 15,
-              }}
-            >
-              {noticeTitles.map((title, i) => (
-                <TouchableOpacity
-                >
-                  <View
-                    style={{
-                      width: "100%",
-                      height: 80,
-                      backgroundColor: "#ffffff",
-                      borderRadius: 12,
-                      paddingHorizontal: 20,
-                      paddingVertical: 12,
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      shadowColor: "#000",
-                      shadowOffset: { width: 2, height: 2 },
-                      shadowOpacity: 0.3,
-                      shadowRadius: 3,
-                      elevation: 4,
-                    }}
+              <View
+                style={{
+                  gap: 10,
+                  marginTop: 10,
+                  paddingHorizontal: 15,
+                }}
+              >
+                {noticeTitles.map((title, i) => (
+                  <TouchableOpacity
+                    key={`${m}-${title}`}
+                    onPress={() => handleTitlePress(title)}
                   >
-                    <View>
-                      <Text
-                        style={{ fontFamily: "Pretendard-Light", fontSize: 15 }}
-                      >
-                        {title}
-                      </Text>
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          marginTop: 6,
-                        }}
-                      >
+                    <View
+                      style={{
+                        width: "100%",
+                        height: 80,
+                        backgroundColor: "#ffffff",
+                        borderRadius: 12,
+                        paddingHorizontal: 20,
+                        paddingVertical: 12,
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        shadowColor: "#000",
+                        shadowOffset: { width: 2, height: 2 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 3,
+                        elevation: 4,
+                      }}
+                    >
+                      <View>
                         <Text
                           style={{
+                            color: readTitles.includes(title)
+                              ? "#909090"
+                              : "#000000",
                             fontFamily: "Pretendard-Light",
-                            fontSize: 10,
+                            fontSize: 15,
                           }}
                         >
-                          2025-0{m}-28
+                          {title}
                         </Text>
-                        <Text
+                        <View
                           style={{
-                            fontFamily: "Pretendard-Light",
-                            fontSize: 12,
-                            color: "#ffffff",
-                            marginLeft: 8,
-                            paddingHorizontal: 4,
-                            paddingTop: 1,
-                            paddingBottom: 1,
-                            lineHeight: 14,
-                            borderRadius: 5,
-                            backgroundColor: "#8e8e8e",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            marginTop: 6,
                           }}
                         >
-                          전공
-                        </Text>
+                          <Text
+                            style={{
+                              fontFamily: "Pretendard-Light",
+                              fontSize: 10,
+                            }}
+                          >
+                            2025-0{m}-28
+                          </Text>
+                          <Text
+                            style={{
+                              fontFamily: "Pretendard-Light",
+                              fontSize: 12,
+                              color: "#ffffff",
+                              marginLeft: 8,
+                              paddingHorizontal: 4,
+                              paddingTop: 1,
+                              paddingBottom: 1,
+                              lineHeight: 14,
+                              borderRadius: 5,
+                              backgroundColor: "#8e8e8e",
+                            }}
+                          >
+                            전공
+                          </Text>
+                        </View>
                       </View>
-                    </View>
 
-                    <Image
-                      source={require("../../assets/images/bookmark.png")}
-                      style={{ width: 24, height: 24 }}
-                    />
-                  </View>
-                </TouchableOpacity>
-              ))}
+                      <Image
+                        source={require("../../assets/images/bookmark.png")}
+                        style={{
+                          width: 24,
+                          height: 24,
+                          resizeMode: "contain",
+                          overflow: "visible",
+                        }} // 북마크 아이콘은 현재 사용하지 않음
+                      />
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
-          </View>
-        ))}
+          );
+        })}
       </ScrollView>
     </View>
   );

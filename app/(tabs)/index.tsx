@@ -11,6 +11,7 @@ export default function HomeScreen() {
       <Header />
       <MainContents />
       <BottomBar />
+
     </View>
   );
 }
