@@ -17,7 +17,7 @@ export default function MainContents() {
     "대학혁신지원사업 전공 소모임 모집 안내",
     "INU 나노 디그리 교육과정 안내",
     "25-2학기 파견 교환학생 선발 공고",
-  ];
+  ]
 
   const navi = useNavigation();
   const [readTitles, setReadTitles] = useState<string[]>([]); //이해가 안감
@@ -35,12 +35,16 @@ export default function MainContents() {
 
   // 읽은 제목 추가 + 저장
   const handleTitlePress = async (title: string) => {
-    if (!readTitles.includes(title)) {
-      const updated = [...readTitles, title];
-      setReadTitles(updated);
-      await AsyncStorage.setItem("readTitles", JSON.stringify(updated));
+    try {
+      if (!readTitles.includes(title)) {
+        const updated = [...readTitles, title];
+        setReadTitles(updated);
+        await AsyncStorage.setItem("readTitles", JSON.stringify(updated));
+      }
+      (navi as any).navigate("detail", { title });
+    } catch (error) {
+      console.error("제목 클릭 처리 중 오류:", error);
     }
-    navi.navigate("detail", { title });
   };
 
   if (!fontsLoaded) return null;
@@ -146,7 +150,8 @@ export default function MainContents() {
                           height: 24,
                           resizeMode: "contain",
                           overflow: "visible",
-                        }} // 북마크 아이콘은 현재 사용하지 않음
+                          padding: 10,
+                        }}
                       />
                     </View>
                   </TouchableOpacity>
