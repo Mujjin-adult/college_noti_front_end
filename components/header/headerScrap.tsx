@@ -2,7 +2,7 @@ import { useFonts } from "expo-font";
 import React, { useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
-export default function Header() {
+export default function HeaderScreen() {
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
     "Pretendard-ExtraBold": require("../../assets/fonts/Pretendard-ExtraBold.ttf"),
@@ -10,18 +10,9 @@ export default function Header() {
     "Pretendard-Light": require("../../assets/fonts/Pretendard-Light.ttf"),
     "Pretendard-Regular": require("../../assets/fonts/Pretendard-Regular.ttf"),
   });
-  const categories = [
-    "학과",
-    "학사",
-    "장학",
-    "취업",
-    "교육",
-    "창업",
-    "행사",
-    "기타",
-  ];
+  const categories = ["관심 공지", "스크랩 공지"];
 
-  const [selected, setSelected] = useState("학과");
+  const [selected, setSelected] = useState("관심 공지");
 
   if (!fontsLoaded) return null;
 
@@ -29,7 +20,6 @@ export default function Header() {
     <View
       style={{
         width: "100%",
-        height: 160,
         backgroundColor: "white",
       }}
     >
@@ -70,51 +60,51 @@ export default function Header() {
       <View
         style={{
           width: "100%",
-          height: 47, // 탭 바 높이
           backgroundColor: "#ffffff",
           borderBottomWidth: 1,
           borderBottomColor: "#bababa",
         }}
       >
         {/* 탭 바 안 카테고리 */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              height: 50, // 내부 row
-            }}
-          >
-            {categories.map((category) => (
-              <TouchableOpacity
-                key={category}
-                onPress={() => setSelected(category)}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            height: 50,
+            flex: 1,
+          }}
+        >
+          {categories.map((category) => (
+            <TouchableOpacity
+              key={category}
+              style={{ flex: 1 }}
+              onPress={() => setSelected(category)}
+            >
+              <View
+                style={{
+                  paddingHorizontal: 0,
+                  paddingVertical: 15,
+                  borderBottomWidth: selected === category ? 4 : 0,
+                  borderBottomColor: "#bababa",
+                  alignItems: "center",
+                }}
               >
-                <View
+                <Text
                   style={{
-                    paddingHorizontal: 20,
-                    paddingVertical: 10,
-                    borderBottomWidth: selected === category ? 4 : 0,
-                    borderBottomColor: "#bababa",
+                    fontFamily:
+                      selected === category
+                        ? "Pretendard-Bold"
+                        : "Pretendard-Light",
+                    color: selected === category ? "black" : "#555",
+                    fontSize: 15,
                   }}
                 >
-                  <Text
-                    style={{
-                      fontFamily:
-                        selected === category
-                          ? "Pretendard-Bold"
-                          : "Pretendard-Light",
-                      color: selected === category ? "black" : "#555",
-                      fontSize: 15,
-                    }}
-                  >
-                    {category}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </ScrollView>
+                  {category}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
     </View>
   );

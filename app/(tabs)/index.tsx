@@ -2,14 +2,20 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 
 import Splash from "../../components/splash/splash";
+import MainContents from "@/components/maincontents/maincontents";
+import BottomBar from "@/components/bottombar/bottombar";
+import HeaderScript from "@/components/header/headerScrap";
 
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
-      {/* <Header />
+      {/* <HeaderMaj />
       <MainContents />
       <BottomBar /> */}
-      <Splash />
+      {/* <Splash /> */}
+      <HeaderScript />
+      <MainContents />
+      <BottomBar />
     </View>
   );
 }
