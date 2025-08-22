@@ -12,10 +12,10 @@ export default function HomeScreen() {
       {/* <HeaderMaj />
       <MainContents />
       <BottomBar /> */}
-      {/* <Splash /> */}
-      <HeaderScript />
+      <Splash />
+      {/* <HeaderScript />
       <MainContents />
-      <BottomBar />
+      <BottomBar /> */}
     </View>
   );
 }

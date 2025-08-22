@@ -55,9 +55,9 @@ export default function Splash() {
         alignItems: "center",
       }}
     >
-      {/* 이미지 ㄸ */}
+      {/* 이미지 ㄹ */}
       <Image
-        source={require("../../assets/images/Group1.png")}
+        source={require("../../assets/images/rr.png")}
         style={{
           position: "absolute",
           width: width * 0.3,
@@ -67,9 +67,9 @@ export default function Splash() {
           left: "42%",
         }}
       />
-      {/* 이미지 ㄹ */}
+      {/* 이미지 ㄸ */}
       <Animated.Image
-        source={require("../../assets/images/Group2.png")}
+        source={require("../../assets/images/dd.png")}
         style={{
           position: "absolute",
           width: width * 0.3,
