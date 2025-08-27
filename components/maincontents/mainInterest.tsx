@@ -31,17 +31,23 @@ export default function MainContents() {
 
   const navi = useNavigation();
   const [readTitles, setReadTitles] = useState<string[]>([]); //이해가 안감
+  const [bookmarkedTitles, setBookmarkedTitles] = useState<string[]>([]);
   const swipeRefs = useRef<{ [key: string]: Swipeable | null }>({});
 
-  // 앱 시작 시 읽은 목록 불러오기
+  // 앱 시작 시 읽은 목록과 북마크 목록 불러오기
   useEffect(() => {
-    const loadReadTitles = async () => {
-      const stored = await AsyncStorage.getItem("readTitles");
-      if (stored) {
-        setReadTitles(JSON.parse(stored));
+    const loadData = async () => {
+      const storedRead = await AsyncStorage.getItem("readTitles");
+      if (storedRead) {
+        setReadTitles(JSON.parse(storedRead));
+      }
+      
+      const storedBookmarks = await AsyncStorage.getItem("bookmarkedTitles");
+      if (storedBookmarks) {
+        setBookmarkedTitles(JSON.parse(storedBookmarks));
       }
     };
-    loadReadTitles();
+    loadData();
   }, []);
 
   // 읽은 제목 추가 + 저장
@@ -52,7 +58,7 @@ export default function MainContents() {
         setReadTitles(updated);
         await AsyncStorage.setItem("readTitles", JSON.stringify(updated));
       }
-      (navi as any).navigate("detail", { title });
+      (navi as any).navigate("notice/detail", { title });
     } catch (error) {
       console.error("제목 클릭 처리 중 오류:", error);
     }
@@ -60,16 +66,20 @@ export default function MainContents() {
 
 const handleBookmark = async (title: string) => {
   try {
-    const stored = await AsyncStorage.getItem("bookmarkedTitles");
-    const bookmarkedTitles = stored ? JSON.parse(stored) : [];
-
-    if (!bookmarkedTitles.includes(title)) {
-      bookmarkedTitles.push(title);
-      await AsyncStorage.setItem("bookmarkedTitles", JSON.stringify(bookmarkedTitles));
-      alert("북마크에 추가되었습니다.");
+    let updatedBookmarks;
+    
+    if (bookmarkedTitles.includes(title)) {
+      // 북마크 제거
+      updatedBookmarks = bookmarkedTitles.filter(t => t !== title);
+      alert("북마크에서 제거되었습니다.");
     } else {
-      alert("이미 북마크에 추가된 공지입니다.");
+      // 북마크 추가
+      updatedBookmarks = [...bookmarkedTitles, title];
+      alert("북마크에 추가되었습니다.");
     }
+    
+    setBookmarkedTitles(updatedBookmarks);
+    await AsyncStorage.setItem("bookmarkedTitles", JSON.stringify(updatedBookmarks));
   } catch (error) {
     console.error("북마크 처리 중 오류:", error);
   }
@@ -113,7 +123,9 @@ const handleBookmark = async (title: string) => {
           }}
         >
           <Image
-            source={require("../../assets/images/bookmark.png")}
+            source={bookmarkedTitles.includes(title) 
+              ? require("../../assets/images/bookmark2.png") 
+              : require("../../assets/images/bookmark.png")}
             style={{
               width: 20,
               height: 20,
@@ -248,16 +260,26 @@ const handleBookmark = async (title: string) => {
                           </View>
                         </View>
 
-                        <Image
-                          source={require("../../assets/images/bookmark.png")}
+                        <TouchableOpacity
+                          onPress={(e) => {
+                            e.stopPropagation();
+                            handleBookmark(title);
+                          }}
                           style={{
-                            width: 24,
-                            height: 24,
-                            resizeMode: "contain",
-                            overflow: "visible",
                             padding: 10,
                           }}
-                        />
+                        >
+                          <Image
+                            source={bookmarkedTitles.includes(title) 
+                              ? require("../../assets/images/bookmark2.png") 
+                              : require("../../assets/images/bookmark.png")}
+                            style={{
+                              width: 24,
+                              height: 24,
+                              resizeMode: "contain",
+                            }}
+                          />
+                        </TouchableOpacity>
                       </View>
                     </TouchableOpacity>
                   </Swipeable>

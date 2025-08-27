@@ -2,7 +2,7 @@ import { useFonts } from "expo-font";
 import React, { useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
-export default function HeaderMaj() {
+export default function HeaderAll() {
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
     "Pretendard-ExtraBold": require("../../assets/fonts/Pretendard-ExtraBold.ttf"),
@@ -11,14 +11,14 @@ export default function HeaderMaj() {
     "Pretendard-Regular": require("../../assets/fonts/Pretendard-Regular.ttf"),
   });
   const categories = [
-    "학과",
     "학사",
-    "장학",
-    "취업",
-    "교육",
-    "창업",
-    "행사",
-    "기타",
+    "학점교류",
+    "일반/행사/모집",
+    "장학금",
+    "등록금 납부",
+    "교육시험",
+    "봉사",
+    "채용정보",
   ];
 
   const [selected, setSelected] = useState("학과");
@@ -70,7 +70,7 @@ export default function HeaderMaj() {
       <View
         style={{
           width: "100%",
-          height: 47, // 탭 바 높이
+          height: 50, // 탭 바 높이
           backgroundColor: "#ffffff",
           borderBottomWidth: 1,
           borderBottomColor: "#bababa",
@@ -93,7 +93,7 @@ export default function HeaderMaj() {
                 <View
                   style={{
                     paddingHorizontal: 20,
-                    paddingVertical: 10,
+                    paddingVertical: 12,
                     borderBottomWidth: selected === category ? 4 : 0,
                     borderBottomColor: "#bababa",
                   }}

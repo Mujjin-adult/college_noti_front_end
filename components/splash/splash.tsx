@@ -39,7 +39,7 @@ export default function Splash() {
           useNativeDriver: true,
         }),
       ]).start(() => {
-        setTimeout(rotate, 3000); // 3초마다 반복
+        setTimeout(rotate, 1000); // 1초마다 반복
       });
     };
 
