@@ -1,6 +1,6 @@
 import { useFonts } from "expo-font";
 import React, { useState } from "react";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 export default function HeaderScreen() {
   const [fontsLoaded] = useFonts({
@@ -31,29 +31,31 @@ export default function HeaderScreen() {
           backgroundColor: "#3366FF",
           paddingTop: 60,
           paddingBottom: 10,
+          justifyContent: "space-between",
+          paddingHorizontal: 30,
         }}
       >
-        <View style={{ flex: 1 }}>
-          <Text
-            style={{
-              color: "#FFFFFF",
-              fontFamily: "Pretendard-SemiBold",
-              fontSize: 20,
-              textAlign: "center",
-              marginLeft: 60,
-            }}
-          >
-            띠링인캠퍼스
-          </Text>
-        </View>
-        <Image
-          source={require("../../assets/images/종.png")}
+        <View style={{ flex: 1,  }} />
+        <Text
           style={{
-            width: 22,
-            height: 27,
-            marginRight: 30,
+            color: "#FFFFFF",
+            fontFamily: "Pretendard-SemiBold",
+            fontSize: 20,
+            textAlign: "center",
           }}
-        />
+        >
+          띠링인캠퍼스
+        </Text>
+        <View style={{ flex: 1, alignItems: "flex-end" }}>
+          <Image
+            source={require("../../assets/images/종.png")}
+            style={{
+              width: 25,
+              height: 25,
+              resizeMode: "contain",
+            }}
+          />
+        </View>
       </View>
 
       {/* 탭 바 (크기 고정) */}
