@@ -7,6 +7,7 @@ import All from "@/components/topmenu/all";
 import Header from "@/components/topmenu/header";
 import Scrap from "@/components/topmenu/scrap";
 import Splash from "../../components/splash/splash";
+import EmptyScrap from "@/components/maincontents/emptyScrap";
 
 export default function HomeScreen() {
   const [showSplash, setShowSplash] = useState(true);
@@ -30,9 +31,12 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
+      {/* emptyScrap */}
       <Header />
-      {activeTab === 1 ? <Scrap /> : <All />}
-      <MainContents />
+      <Scrap />
+      {/* {activeTab === 1 ? <Scrap /> : <All />}
+      <MainContents /> */}
+      <EmptyScrap />
       <BottomBar onTabPress={handleTabPress} />
     </View>
   );
