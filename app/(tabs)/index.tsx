@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-import Splash from "../../components/splash/splash";
-import MainContents from "@/components/maincontents/mainInterest";
 import BottomBar from "@/components/bottombar/bottombar";
-import HeaderAll from "@/components/header/headerAll";
-import HeaderScrap from "@/components/header/headerScrap";
+import MainContents from "@/components/maincontents/mainInterest";
+import All from "@/components/topmenu/all";
+import Header from "@/components/topmenu/header";
+import Scrap from "@/components/topmenu/scrap";
+import Splash from "../../components/splash/splash";
 
 export default function HomeScreen() {
   const [showSplash, setShowSplash] = useState(true);
@@ -29,7 +30,8 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      {activeTab === 1 ? <HeaderScrap /> : <HeaderAll />}
+      <Header />
+      {activeTab === 1 ? <Scrap /> : <All />}
       <MainContents />
       <BottomBar onTabPress={handleTabPress} />
     </View>

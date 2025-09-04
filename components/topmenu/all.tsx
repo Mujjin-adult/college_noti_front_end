@@ -2,7 +2,7 @@ import { useFonts } from "expo-font";
 import React, { useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
-export default function HeaderAll() {
+export default function All() {
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
     "Pretendard-ExtraBold": require("../../assets/fonts/Pretendard-ExtraBold.ttf"),
@@ -29,50 +29,16 @@ export default function HeaderAll() {
     <View
       style={{
         width: "100%",
-        height: 160,
+        height: 49,
         backgroundColor: "white",
       }}
     >
-      {/* 헤더 영역 */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          backgroundColor: "#3366FF",
-          paddingTop: 60,
-          paddingBottom: 10,
-          justifyContent: "space-between",
-          paddingHorizontal: 30,
-        }}
-      >
-        <View style={{ flex: 1 }} />
-        <Text
-          style={{
-            color: "#FFFFFF",
-            fontFamily: "Pretendard-SemiBold",
-            fontSize: 20,
-            textAlign: "center",
-          }}
-        >
-          띠링인캠퍼스
-        </Text>
-        <View style={{ flex: 1, alignItems: "flex-end" }}>
-          <Image
-            source={require("../../assets/images/종.png")}
-            style={{
-              width: 25,
-              height: 25,
-              resizeMode: "contain",
-            }}
-          />
-        </View>
-      </View>
 
       {/* 탭 바 (크기 고정) */}
       <View
         style={{
           width: "100%",
-          height: 50, // 탭 바 높이
+          height: 49, // 탭 바 높이
           backgroundColor: "#ffffff",
           borderBottomWidth: 1,
           borderBottomColor: "#bababa",
