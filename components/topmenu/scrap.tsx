@@ -20,6 +20,7 @@ export default function Scrap() {
     <View
       style={{
         width: "100%",
+        height: 49,
         backgroundColor: "white",
       }}
     >

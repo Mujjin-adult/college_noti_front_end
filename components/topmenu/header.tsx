@@ -23,7 +23,6 @@ export default function Header({ showBackButton = false }: HeaderProps) {
     <View
       style={{
         width: "100%",
-        height: 100,
         backgroundColor: "white",
       }}
     >
@@ -71,7 +70,7 @@ export default function Header({ showBackButton = false }: HeaderProps) {
           <Image
             source={require("../../assets/images/종.png")}
             style={{
-              width: 25,
+              width: 20,
               height: 25,
               resizeMode: "contain",
             }}
