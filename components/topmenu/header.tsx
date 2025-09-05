@@ -1,6 +1,6 @@
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 interface HeaderProps {
@@ -9,6 +9,7 @@ interface HeaderProps {
 
 export default function Header({ showBackButton = false }: HeaderProps) {
   const router = useRouter();
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
     "Pretendard-ExtraBold": require("../../assets/fonts/Pretendard-ExtraBold.ttf"),
@@ -16,6 +17,16 @@ export default function Header({ showBackButton = false }: HeaderProps) {
     "Pretendard-Light": require("../../assets/fonts/Pretendard-Light.ttf"),
     "Pretendard-Regular": require("../../assets/fonts/Pretendard-Regular.ttf"),
   });
+
+  const handleBellClick = () => {
+    if (isAlertOpen) {
+      router.back();
+      setIsAlertOpen(false);
+    } else {
+      router.push("/alert");
+      setIsAlertOpen(true);
+    }
+  };
 
   if (!fontsLoaded) return null;
 
@@ -67,14 +78,20 @@ export default function Header({ showBackButton = false }: HeaderProps) {
           ) : (
             <View style={{ width: 40 }} />
           )}
-          <Image
-            source={require("../../assets/images/종.png")}
-            style={{
-              width: 20,
-              height: 25,
-              resizeMode: "contain",
-            }}
-          />
+          <TouchableOpacity onPress={handleBellClick}>
+            <Image
+              source={
+                isAlertOpen 
+                  ? require("../../assets/images/종2.png")
+                  : require("../../assets/images/종.png")
+              }
+              style={{
+                width: 20,
+                height: 25,
+                resizeMode: "contain",
+              }}
+            />
+          </TouchableOpacity>
         </View>
         <Text
           style={{
