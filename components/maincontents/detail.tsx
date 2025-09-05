@@ -108,45 +108,27 @@ export default function Detail() {
     >
       <View
         style={{
-          width: 275,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          marginTop: 20,
+          marginLeft: 15,
+          marginRight: 15,
         }}
       >
-        <Text
+        <View
           style={{
-            fontFamily: "Pretendard-regular",
-            fontSize: 15,
-            marginTop: 20,
-            marginLeft: 15,
-            marginBottom: 3,
+            flex: 1,
           }}
         >
-          {detailTitle}
-        </Text>
-        <Text
-          style={{
-            fontFamily: "Pretendard-Light",
-            fontSize: 12,
-            marginTop: 10,
-            marginBottom: 0,
-            marginLeft: 15,
-          }}
-        >
-          2025-09-28
           <Text
             style={{
-              fontFamily: "Pretendard-Light",
-              fontSize: 12,
-              color: "#ffffff",
-              marginLeft: 8,
-              paddingHorizontal: 4,
-              paddingTop: 1,
-              paddingBottom: 1,
-              lineHeight: 14,
-              borderRadius: 5,
-              backgroundColor: "#8e8e8e",
+              fontFamily: "Pretendard-regular",
+              fontSize: 15,
+              marginBottom: 3,
             }}
           >
-            전공
+            {detailTitle}
           </Text>
           <Text
             style={{
@@ -154,40 +136,75 @@ export default function Detail() {
               fontSize: 12,
               marginTop: 10,
               marginBottom: 0,
-              marginLeft: 8,
             }}
           >
-            조회 123456
+            2025-09-28
+            <Text
+              style={{
+                fontFamily: "Pretendard-Light",
+                fontSize: 12,
+                color: "#ffffff",
+                marginLeft: 8,
+                paddingHorizontal: 4,
+                paddingTop: 1,
+                paddingBottom: 1,
+                lineHeight: 14,
+                borderRadius: 5,
+                backgroundColor: "#8e8e8e",
+              }}
+            >
+              전공
+            </Text>
+            <Text
+              style={{
+                fontFamily: "Pretendard-Light",
+                fontSize: 12,
+                marginTop: 10,
+                marginBottom: 0,
+                marginLeft: 8,
+              }}
+            >
+              조회 123456
+            </Text>
           </Text>
-        </Text>
+        </View>
         <View
           style={{
-            flex: 1,
             flexDirection: "row",
+            alignItems: "center",
           }}
         >
           <Image
             source={require("../../assets/images/bookmark.png")}
-            style={{ width: 30, height: 30, resizeMode: "contain" }}
+            style={{
+              width: 25,
+              height: 25,
+              resizeMode: "contain",
+              marginLeft: 10,
+            }}
           />
           <Image
             source={require("../../assets/images/export.png")}
-            style={{ width: 30, height: 30, resizeMode: "contain" }}
+            style={{
+              width: 27,
+              height: 27,
+              resizeMode: "contain",
+              marginLeft: 10,
+            }}
           />
         </View>
       </View>
       <View
         style={{
           flex: 1,
+          marginTop: 40,
         }}
       >
         <Text
           style={{
             fontFamily: "Pretendard-Bold",
             fontSize: 20,
-            marginTop: 20,
             marginLeft: 10,
-            marginRight: 10,
           }}
         >
           {detailTitle}
@@ -195,10 +212,10 @@ export default function Detail() {
         <Text
           style={{
             fontFamily: "Pretendard-regular",
-            fontSize: 20,
+            fontSize: 18,
             marginTop: 20,
             marginLeft: 10,
-            marginRight: 10,
+            marginRight: 20,
           }}
         >
           {detailText}

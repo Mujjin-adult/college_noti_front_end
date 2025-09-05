@@ -1,8 +1,14 @@
 import { useFonts } from "expo-font";
+import { useRouter } from "expo-router";
 import React from "react";
-import { Image, Text, View } from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
-export default function Header() {
+interface HeaderProps {
+  showBackButton?: boolean;
+}
+
+export default function Header({ showBackButton = false }: HeaderProps) {
+  const router = useRouter();
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
     "Pretendard-ExtraBold": require("../../assets/fonts/Pretendard-ExtraBold.ttf"),
@@ -26,6 +32,7 @@ export default function Header() {
         style={{
           flexDirection: "row",
           alignItems: "center",
+          
           backgroundColor: "#3366FF",
           paddingTop: 60,
           paddingBottom: 10,
@@ -33,18 +40,34 @@ export default function Header() {
           paddingHorizontal: 30,
         }}
       >
-        <View style={{ flex: 1 }} />
-        <Text
+        <View
           style={{
-            color: "#FFFFFF",
-            fontFamily: "Pretendard-SemiBold",
-            fontSize: 20,
-            textAlign: "center",
+            flex: 1,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
-          띠링인캠퍼스
-        </Text>
-        <View style={{ flex: 1, alignItems: "flex-end" }}>
+          {showBackButton ? (
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={{
+                padding: 10,
+                marginLeft: -20,
+              }}
+            >
+              <Image
+                source={require("../../assets/images/back.png")}
+                style={{
+                  width: 20,
+                  height: 20,
+                  resizeMode: "contain",
+                }}
+              />
+            </TouchableOpacity>
+          ) : (
+            <View style={{ width: 40 }} />
+          )}
           <Image
             source={require("../../assets/images/종.png")}
             style={{
@@ -54,6 +77,19 @@ export default function Header() {
             }}
           />
         </View>
+        <Text
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            color: "#FFFFFF",
+            fontFamily: "Pretendard-SemiBold",
+            fontSize: 20,
+            textAlign: "center",
+          }}
+        >
+          띠링인캠퍼스
+        </Text>
       </View>
     </View>
   );

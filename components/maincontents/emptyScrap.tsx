@@ -32,7 +32,7 @@ export default function EmptyScrap() {
           marginBottom: 15,
         }}
       >
-        저장된 공지가 없습니다
+        저장한 공지가 없습니다
       </Text>
       <Text
         style={{

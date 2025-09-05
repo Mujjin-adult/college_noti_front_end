@@ -5,7 +5,11 @@
       "Bash(npm run lint)",
       "Read(/C:\\Users\\gmlfl\\Desktop\\noti\\app\\(tabs)/**)",
       "Read(/C:\\Users\\gmlfl\\Desktop\\noti\\components\\topmenu/**)",
-      "Bash(npx expo start:*)"
+      "Bash(npx expo start:*)",
+      "Read(/C:\\Users\\gmlfl\\Desktop\\noti\\components\\maincontents/**)",
+      "Read(/C:\\Users\\gmlfl\\Desktop\\noti\\components\\maincontents/**)",
+      "Read(/C:\\Users\\gmlfl\\Desktop\\noti\\components\\maincontents/**)",
+      "Read(/C:\\Users\\gmlfl\\Desktop\\noti\\components\\topmenu/**)"
     ],
     "deny": [],
     "ask": []

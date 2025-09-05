@@ -43,7 +43,7 @@ export default function HomeScreen() {
       <BottomBar onTabPress={handleTabPress} /> */}
 
       {/* 공지 상세 화면 */}
-      <Header />
+      <Header showBackButton={true} />
       {activeTab === 1 ? <Scrap /> : <All />}
       <Detail />
       <BottomBar onTabPress={handleTabPress} />
