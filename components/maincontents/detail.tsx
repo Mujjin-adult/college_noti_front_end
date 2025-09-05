@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Image, Share, Text, TouchableOpacity, View } from "react-native";
 
 export default function Detail() {
@@ -10,6 +10,20 @@ export default function Detail() {
   const [bookmarkedTitles, setBookmarkedTitles] = useState<string[]>([]);
   const detailTitle = "[인천학연구원] 25-2 국가근로 장학생 모집";
   const detailText = "공지 본문 내용";
+
+  useEffect(() => {
+    const loadBookmarks = async () => {
+      try {
+        const saved = await AsyncStorage.getItem("bookmarkedTitles");
+        if (saved) {
+          setBookmarkedTitles(JSON.parse(saved));
+        }
+      } catch (error) {
+        console.error("북마크 불러오기 오류:", error);
+      }
+    };
+    loadBookmarks();
+  }, []);
 
   const handleBookmark = async (title: string) => {
     try {
@@ -174,24 +188,32 @@ export default function Detail() {
             alignItems: "center",
           }}
         >
-          <Image
-            source={require("../../assets/images/bookmark.png")}
-            style={{
-              width: 25,
-              height: 25,
-              resizeMode: "contain",
-              marginLeft: 10,
-            }}
-          />
-          <Image
-            source={require("../../assets/images/export.png")}
-            style={{
-              width: 27,
-              height: 27,
-              resizeMode: "contain",
-              marginLeft: 10,
-            }}
-          />
+          <TouchableOpacity onPress={() => handleBookmark(detailTitle)}>
+            <Image
+              source={
+                bookmarkedTitles.includes(detailTitle)
+                  ? require("../../assets/images/bookmark2.png")
+                  : require("../../assets/images/bookmark.png")
+              }
+              style={{
+                width: 25,
+                height: 25,
+                resizeMode: "contain",
+                marginLeft: 10,
+              }}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleShare(detailTitle)}>
+            <Image
+              source={require("../../assets/images/export.png")}
+              style={{
+                width: 27,
+                height: 27,
+                resizeMode: "contain",
+                marginLeft: 10,
+              }}
+            />
+          </TouchableOpacity>
         </View>
       </View>
       <View
