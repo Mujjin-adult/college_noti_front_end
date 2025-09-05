@@ -4,7 +4,7 @@ import { Animated, Dimensions, Image, Text, View } from "react-native";
 
 export default function Splash() {
   const { width } = Dimensions.get("window");
-  
+
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
     "Pretendard-ExtraBold": require("../../assets/fonts/Pretendard-ExtraBold.ttf"),
@@ -17,7 +17,7 @@ export default function Splash() {
 
   useEffect(() => {
     if (!fontsLoaded) return;
-    
+
     const rotate = () => {
       Animated.sequence([
         Animated.timing(rotateAni, {
