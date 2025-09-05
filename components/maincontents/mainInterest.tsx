@@ -31,7 +31,7 @@ export default function MainContents() {
 
   const navi = useNavigation();
   const [readTitles, setReadTitles] = useState<string[]>([]); //이해가 안감
-  const [bookmarkedTitles, setBookmarkedTitles] = useState<string[]>([]);
+  const [bookmarkedItems, setBookmarkedItems] = useState<string[]>([]);
   const swipeRefs = useRef<{ [key: string]: Swipeable | null }>({});
 
   // 앱 시작 시 읽은 목록과 북마크 목록 불러오기
@@ -41,10 +41,10 @@ export default function MainContents() {
       if (storedRead) {
         setReadTitles(JSON.parse(storedRead));
       }
-      
-      const storedBookmarks = await AsyncStorage.getItem("bookmarkedTitles");
+
+      const storedBookmarks = await AsyncStorage.getItem("bookmarkedItems");
       if (storedBookmarks) {
-        setBookmarkedTitles(JSON.parse(storedBookmarks));
+        setBookmarkedItems(JSON.parse(storedBookmarks));
       }
     };
     loadData();
@@ -64,26 +64,29 @@ export default function MainContents() {
     }
   };
 
-const handleBookmark = async (title: string) => {
-  try {
-    let updatedBookmarks;
-    
-    if (bookmarkedTitles.includes(title)) {
-      // 북마크 제거
-      updatedBookmarks = bookmarkedTitles.filter(t => t !== title);
-      alert("북마크에서 제거되었습니다.");
-    } else {
-      // 북마크 추가
-      updatedBookmarks = [...bookmarkedTitles, title];
-      alert("북마크에 추가되었습니다.");
+  const handleBookmark = async (uniqueKey: string) => {
+    try {
+      let updatedBookmarks;
+
+      if (bookmarkedItems.includes(uniqueKey)) {
+        // 북마크 제거
+        updatedBookmarks = bookmarkedItems.filter((key) => key !== uniqueKey);
+        alert("북마크에서 제거되었습니다.");
+      } else {
+        // 북마크 추가
+        updatedBookmarks = [...bookmarkedItems, uniqueKey];
+        alert("북마크에 추가되었습니다.");
+      }
+
+      setBookmarkedItems(updatedBookmarks);
+      await AsyncStorage.setItem(
+        "bookmarkedItems",
+        JSON.stringify(updatedBookmarks)
+      );
+    } catch (error) {
+      console.error("북마크 처리 중 오류:", error);
     }
-    
-    setBookmarkedTitles(updatedBookmarks);
-    await AsyncStorage.setItem("bookmarkedTitles", JSON.stringify(updatedBookmarks));
-  } catch (error) {
-    console.error("북마크 처리 중 오류:", error);
-  }
-};
+  };
 
   // 공유 탭 띄우기 함수
   const handleShare = async (title: string) => {
@@ -97,7 +100,7 @@ const handleBookmark = async (title: string) => {
     }
   };
 
-  const swipe = (title: string) => {
+  const swipe = (title: string, uniqueKey: string) => {
     return (
       <TouchableOpacity
         style={{
@@ -111,7 +114,7 @@ const handleBookmark = async (title: string) => {
         onPress={() => handleShare(title)}
       >
         {/* 북마크 아이콘 */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={{
             zIndex: 10,
             elevation: 10,
@@ -119,13 +122,15 @@ const handleBookmark = async (title: string) => {
           }}
           onPress={(e) => {
             e.stopPropagation();
-            handleBookmark(title);
+            handleBookmark(uniqueKey);
           }}
         >
           <Image
-            source={bookmarkedTitles.includes(title) 
-              ? require("../../assets/images/bookmark2.png") 
-              : require("../../assets/images/bookmark.png")}
+            source={
+              bookmarkedItems.includes(uniqueKey)
+                ? require("../../assets/images/bookmark2.png")
+                : require("../../assets/images/bookmark.png")
+            }
             style={{
               width: 20,
               height: 20,
@@ -177,112 +182,114 @@ const handleBookmark = async (title: string) => {
                 }}
               >
                 {noticeTitles.map((title, i) => {
-                  const swipeKey = `${m}-${title}`;
+                  const uniqueKey = `${m}-${i}`;
                   return (
                     <Swipeable
-                      key={swipeKey}
-                      renderRightActions={() => swipe(title)}
+                      key={uniqueKey}
+                      renderRightActions={() => swipe(title, uniqueKey)}
                       containerStyle={{ overflow: "visible" }}
                       friction={0.7}
                       rightThreshold={40}
                       onSwipeableWillOpen={() => {
                         // 다른 모든 열린 스와이프를 닫기
                         Object.keys(swipeRefs.current).forEach((key) => {
-                          if (key !== swipeKey && swipeRefs.current[key]) {
+                          if (key !== uniqueKey && swipeRefs.current[key]) {
                             swipeRefs.current[key]?.close();
                           }
                         });
                       }}
                       ref={(ref) => {
-                        swipeRefs.current[swipeKey] = ref;
+                        swipeRefs.current[uniqueKey] = ref;
                       }}
                     >
-                    <TouchableOpacity onPress={() => handleTitlePress(title)}>
-                      <View
-                        style={{
-                          width: "100%",
-                          height: 80,
-                          backgroundColor: "#ffffff",
-                          borderRadius: 12,
-                          paddingHorizontal: 20,
-                          paddingVertical: 12,
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          elevation: 4,
-                          marginHorizontal: 2,
-                          marginVertical: 2,
-                        }}
-                      >
-                        <View>
-                          <Text
-                            style={{
-                              color: readTitles.includes(title)
-                                ? "#909090"
-                                : "#000000",
-                              fontFamily: "Pretendard-Light",
-                              fontSize: 15,
-                            }}
-                          >
-                            {title}
-                          </Text>
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              alignItems: "center",
-                              marginTop: 6,
-                            }}
-                          >
-                            <Text
-                              style={{
-                                fontFamily: "Pretendard-Light",
-                                fontSize: 10,
-                              }}
-                            >
-                              2025-0{m}-28
-                            </Text>
-                            <Text
-                              style={{
-                                fontFamily: "Pretendard-Light",
-                                fontSize: 12,
-                                color: "#ffffff",
-                                marginLeft: 8,
-                                paddingHorizontal: 4,
-                                paddingTop: 1,
-                                paddingBottom: 1,
-                                lineHeight: 14,
-                                borderRadius: 5,
-                                backgroundColor: "#8e8e8e",
-                              }}
-                            >
-                              전공
-                            </Text>
-                          </View>
-                        </View>
-
-                        <TouchableOpacity
-                          onPress={(e) => {
-                            e.stopPropagation();
-                            handleBookmark(title);
-                          }}
+                      <TouchableOpacity onPress={() => handleTitlePress(title)}>
+                        <View
                           style={{
-                            padding: 10,
+                            width: "100%",
+                            height: 80,
+                            backgroundColor: "#ffffff",
+                            borderRadius: 12,
+                            paddingHorizontal: 20,
+                            paddingVertical: 12,
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            elevation: 4,
+                            marginHorizontal: 2,
+                            marginVertical: 2,
                           }}
                         >
-                          <Image
-                            source={bookmarkedTitles.includes(title) 
-                              ? require("../../assets/images/bookmark2.png") 
-                              : require("../../assets/images/bookmark.png")}
-                            style={{
-                              width: 24,
-                              height: 24,
-                              resizeMode: "contain",
+                          <View>
+                            <Text
+                              style={{
+                                color: readTitles.includes(title)
+                                  ? "#909090"
+                                  : "#000000",
+                                fontFamily: "Pretendard-Light",
+                                fontSize: 15,
+                              }}
+                            >
+                              {title}
+                            </Text>
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                marginTop: 6,
+                              }}
+                            >
+                              <Text
+                                style={{
+                                  fontFamily: "Pretendard-Light",
+                                  fontSize: 10,
+                                }}
+                              >
+                                2025-0{m}-28
+                              </Text>
+                              <Text
+                                style={{
+                                  fontFamily: "Pretendard-Light",
+                                  fontSize: 12,
+                                  color: "#ffffff",
+                                  marginLeft: 8,
+                                  paddingHorizontal: 4,
+                                  paddingTop: 1,
+                                  paddingBottom: 1,
+                                  lineHeight: 14,
+                                  borderRadius: 5,
+                                  backgroundColor: "#8e8e8e",
+                                }}
+                              >
+                                전공
+                              </Text>
+                            </View>
+                          </View>
+
+                          <TouchableOpacity
+                            onPress={(e) => {
+                              e.stopPropagation();
+                              handleBookmark(uniqueKey);
                             }}
-                          />
-                        </TouchableOpacity>
-                      </View>
-                    </TouchableOpacity>
-                  </Swipeable>
+                            style={{
+                              padding: 10,
+                            }}
+                          >
+                            <Image
+                              source={
+                                bookmarkedItems.includes(uniqueKey)
+                                  ? require("../../assets/images/bookmark2.png")
+                                  : require("../../assets/images/bookmark.png")
+                              }
+                              style={{
+                                width: 24,
+                                height: 24,
+                                resizeMode: "contain",
+                              }}
+                            />
+                          </TouchableOpacity>
+                        </View>
+                      </TouchableOpacity>
+                    </Swipeable>
                   );
                 })}
               </View>

@@ -1,13 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-import BottomBar from "@/components/bottombar/bottombar";
+// 스플래쉬 화면
+import Splash from "../../components/splash/splash";
+
+// 메인 콘텐츠
 import Detail from "@/components/maincontents/detail";
+import MainContents from "@/components/maincontents/mainAll";
+import Search from "@/components/maincontents/search";
+import EmptyScrap from "@/components/maincontents/emptyScrap";
+
+// 상단 탭바
 import All from "@/components/topmenu/all";
 import Header from "@/components/topmenu/header";
 import Scrap from "@/components/topmenu/scrap";
-import Splash from "../../components/splash/splash";
 import Alert from "@/components/maincontents/alert";
+
+// 하단 탭바
+import BottomBar from "@/components/bottombar/bottombar";
 
 export default function HomeScreen() {
   const [showSplash, setShowSplash] = useState(true);
@@ -59,14 +69,19 @@ export default function HomeScreen() {
       <MainContents />
       <BottomBar onTabPress={handleTabPress} /> */}
 
+      {/* 검색 페이지 */}
+      <Header />
+      <Search />
+      <BottomBar onTabPress={handleTabPress} />
+
       {/* 공지 상세 화면 */}
       {/* <Header showBackButton={true} />
       {activeTab === 1 ? <Scrap /> : <All />}
       <Detail />
       <BottomBar onTabPress={handleTabPress} /> */}
 
-      {/* 조건부 렌더링 */}
-      {showAlert ? (
+      {/* alert 페이지 조건부 렌더링 */}
+      {/* {showAlert ? (
         <>
           <Header showBackButton={true} onAlertToggle={handleAlertToggle} onBackPress={handleBackPress} />
           <Alert />
@@ -79,7 +94,7 @@ export default function HomeScreen() {
           <Detail />
           <BottomBar onTabPress={handleTabPress} />
         </>
-      )}
+      )} */}
     </View>
   );
 }
