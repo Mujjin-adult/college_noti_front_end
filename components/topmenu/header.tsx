@@ -5,9 +5,10 @@ import { Image, Text, TouchableOpacity, View } from "react-native";
 
 interface HeaderProps {
   showBackButton?: boolean;
+  onAlertToggle?: () => void;
 }
 
-export default function Header({ showBackButton = false }: HeaderProps) {
+export default function Header({ showBackButton = false, onAlertToggle }: HeaderProps) {
   const router = useRouter();
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [fontsLoaded] = useFonts({
@@ -19,12 +20,10 @@ export default function Header({ showBackButton = false }: HeaderProps) {
   });
 
   const handleBellClick = () => {
-    if (isAlertOpen) {
-      router.back();
-      setIsAlertOpen(false);
-    } else {
-      router.push("/alert");
-      setIsAlertOpen(true);
+    console.log("Bell clicked!");
+    setIsAlertOpen(!isAlertOpen);
+    if (onAlertToggle) {
+      onAlertToggle();
     }
   };
 
@@ -42,7 +41,7 @@ export default function Header({ showBackButton = false }: HeaderProps) {
         style={{
           flexDirection: "row",
           alignItems: "center",
-          
+
           backgroundColor: "#3366FF",
           paddingTop: 60,
           paddingBottom: 10,
@@ -78,14 +77,21 @@ export default function Header({ showBackButton = false }: HeaderProps) {
           ) : (
             <View style={{ width: 40 }} />
           )}
-          <TouchableOpacity onPress={handleBellClick}>
+          <TouchableOpacity 
+            onPress={handleBellClick}
+            hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+            style={{
+              padding: 10,
+            }}
+          >
             <Image
               source={
-                isAlertOpen 
+                isAlertOpen
                   ? require("../../assets/images/종2.png")
                   : require("../../assets/images/종.png")
               }
               style={{
+                marginRight: -20,
                 width: 20,
                 height: 25,
                 resizeMode: "contain",
@@ -103,6 +109,7 @@ export default function Header({ showBackButton = false }: HeaderProps) {
             fontSize: 20,
             textAlign: "center",
           }}
+          pointerEvents="none"
         >
           띠링인캠퍼스
         </Text>

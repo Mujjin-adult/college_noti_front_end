@@ -7,10 +7,12 @@ import All from "@/components/topmenu/all";
 import Header from "@/components/topmenu/header";
 import Scrap from "@/components/topmenu/scrap";
 import Splash from "../../components/splash/splash";
+import Alert from "@/components/maincontents/alert";
 
 export default function HomeScreen() {
   const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState<number>(0); // 0: 공지사항, 1: 관심공지
+  const [showAlert, setShowAlert] = useState<boolean>(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -43,9 +45,15 @@ export default function HomeScreen() {
       <BottomBar onTabPress={handleTabPress} /> */}
 
       {/* 공지 상세 화면 */}
-      <Header showBackButton={true} />
+      {/* <Header showBackButton={true} />
       {activeTab === 1 ? <Scrap /> : <All />}
       <Detail />
+      <BottomBar onTabPress={handleTabPress} /> */}
+
+      {/* 공지 상세 화면 */}
+      <Header showBackButton={true} onAlertToggle={() => setShowAlert(!showAlert)} />
+      {activeTab === 1 ? <Scrap /> : <All />}
+      <Alert />
       <BottomBar onTabPress={handleTabPress} />
     </View>
   );
