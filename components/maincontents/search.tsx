@@ -73,7 +73,7 @@ export default function Search() {
       </View>
 
       {/* 검색 결과 영역 */}
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", marginBottom: 100 }}>
         {searchText === "" ? (
           <Text
             style={{
