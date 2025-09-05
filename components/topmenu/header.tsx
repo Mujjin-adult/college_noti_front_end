@@ -6,9 +6,10 @@ import { Image, Text, TouchableOpacity, View } from "react-native";
 interface HeaderProps {
   showBackButton?: boolean;
   onAlertToggle?: () => void;
+  onBackPress?: () => void;
 }
 
-export default function Header({ showBackButton = false, onAlertToggle }: HeaderProps) {
+export default function Header({ showBackButton = false, onAlertToggle, onBackPress }: HeaderProps) {
   const router = useRouter();
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [fontsLoaded] = useFonts({
@@ -59,7 +60,7 @@ export default function Header({ showBackButton = false, onAlertToggle }: Header
         >
           {showBackButton ? (
             <TouchableOpacity
-              onPress={() => router.back()}
+              onPress={onBackPress || (() => router.back())}
               style={{
                 padding: 10,
                 marginLeft: -20,
