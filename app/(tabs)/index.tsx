@@ -9,6 +9,7 @@ import Detail from "@/components/maincontents/detail";
 import MainContents from "@/components/maincontents/mainAll";
 import Search from "@/components/maincontents/search";
 import EmptyScrap from "@/components/maincontents/emptyScrap";
+import Setting from "@/components/maincontents/setting";
 
 // 상단 탭바
 import All from "@/components/topmenu/all";
@@ -70,8 +71,13 @@ export default function HomeScreen() {
       <BottomBar onTabPress={handleTabPress} /> */}
 
       {/* 검색 페이지 */}
-      <Header />
+      {/* <Header />
       <Search />
+      <BottomBar onTabPress={handleTabPress} /> */}
+
+      {/* 더보기 페이지 */}
+      <Header />
+      <Setting />
       <BottomBar onTabPress={handleTabPress} />
 
       {/* 공지 상세 화면 */}
