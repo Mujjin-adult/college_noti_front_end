@@ -31,7 +31,7 @@ export default function MainContents() {
 
   const navi = useNavigation();
   const [readTitles, setReadTitles] = useState<string[]>([]); //이해가 안감
-  const [bookmarkedTitles, setBookmarkedTitles] = useState<string[]>([]);
+  const [bookmarkedItems, setBookmarkedItems] = useState<string[]>([]);
   const swipeRefs = useRef<{ [key: string]: Swipeable | null }>({});
 
   // 앱 시작 시 읽은 목록과 북마크 목록 불러오기
@@ -42,9 +42,9 @@ export default function MainContents() {
         setReadTitles(JSON.parse(storedRead));
       }
 
-      const storedBookmarks = await AsyncStorage.getItem("bookmarkedTitles");
+      const storedBookmarks = await AsyncStorage.getItem("bookmarkedItems");
       if (storedBookmarks) {
-        setBookmarkedTitles(JSON.parse(storedBookmarks));
+        setBookmarkedItems(JSON.parse(storedBookmarks));
       }
     };
     loadData();
@@ -64,23 +64,23 @@ export default function MainContents() {
     }
   };
 
-  const handleBookmark = async (title: string) => {
+  const handleBookmark = async (uniqueKey: string) => {
     try {
       let updatedBookmarks;
 
-      if (bookmarkedTitles.includes(title)) {
+      if (bookmarkedItems.includes(uniqueKey)) {
         // 북마크 제거
-        updatedBookmarks = bookmarkedTitles.filter((t) => t !== title);
+        updatedBookmarks = bookmarkedItems.filter((key) => key !== uniqueKey);
         alert("북마크에서 제거되었습니다.");
       } else {
         // 북마크 추가
-        updatedBookmarks = [...bookmarkedTitles, title];
+        updatedBookmarks = [...bookmarkedItems, uniqueKey];
         alert("북마크에 추가되었습니다.");
       }
 
-      setBookmarkedTitles(updatedBookmarks);
+      setBookmarkedItems(updatedBookmarks);
       await AsyncStorage.setItem(
-        "bookmarkedTitles",
+        "bookmarkedItems",
         JSON.stringify(updatedBookmarks)
       );
     } catch (error) {
@@ -100,7 +100,7 @@ export default function MainContents() {
     }
   };
 
-  const swipe = (title: string) => {
+  const swipe = (title: string, uniqueKey: string) => {
     return (
       <TouchableOpacity
         style={{
@@ -122,12 +122,12 @@ export default function MainContents() {
           }}
           onPress={(e) => {
             e.stopPropagation();
-            handleBookmark(title);
+            handleBookmark(uniqueKey);
           }}
         >
           <Image
             source={
-              bookmarkedTitles.includes(title)
+              bookmarkedItems.includes(uniqueKey)
                 ? require("../../assets/images/bookmark2.png")
                 : require("../../assets/images/bookmark.png")
             }
@@ -182,11 +182,11 @@ export default function MainContents() {
                 }}
               >
                 {noticeTitles.map((title, i) => {
-                  const swipeKey = `${index}-${title}`;
+                  const swipeKey = `${index}-${i}`;
                   return (
                     <Swipeable
                       key={swipeKey}
-                      renderRightActions={() => swipe(title)}
+                      renderRightActions={() => swipe(title, swipeKey)}
                       containerStyle={{ overflow: "visible" }}
                       friction={0.7}
                       rightThreshold={40}
@@ -268,7 +268,7 @@ export default function MainContents() {
                           <TouchableOpacity
                             onPress={(e) => {
                               e.stopPropagation();
-                              handleBookmark(title);
+                              handleBookmark(swipeKey);
                             }}
                             style={{
                               padding: 10,
@@ -276,7 +276,7 @@ export default function MainContents() {
                           >
                             <Image
                               source={
-                                bookmarkedTitles.includes(title)
+                                bookmarkedItems.includes(swipeKey)
                                   ? require("../../assets/images/bookmark2.png")
                                   : require("../../assets/images/bookmark.png")
                               }
