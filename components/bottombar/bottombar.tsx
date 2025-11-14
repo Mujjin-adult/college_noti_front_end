@@ -1,12 +1,13 @@
 import { useFonts } from "expo-font";
-import React, { useState } from "react";
+import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 interface BottomBarProps {
   onTabPress?: (index: number) => void;
+  activeTab?: number;
 }
 
-export default function BottomBar({ onTabPress }: BottomBarProps) {
+export default function BottomBar({ onTabPress, activeTab = 0 }: BottomBarProps) {
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
     "Pretendard-ExtraBold": require("../../assets/fonts/Pretendard-ExtraBold.ttf"),
@@ -42,7 +43,6 @@ export default function BottomBar({ onTabPress }: BottomBarProps) {
   ];
 
   const itemNames = ["공지사항", "관심공지", "AI 챗봇", "검색", "메뉴"];
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   if (!fontsLoaded) return null;
   return (
@@ -64,7 +64,6 @@ export default function BottomBar({ onTabPress }: BottomBarProps) {
         {/* 탭바 안 메뉴들 */}
         {navItems.map((item, index) => (
           <TouchableOpacity key={index} onPress={() => {
-            setActiveIndex(index);
             onTabPress?.(index);
           }}>
             {item.type === "image" && (
@@ -76,7 +75,7 @@ export default function BottomBar({ onTabPress }: BottomBarProps) {
               >
                 <Image
                   source={
-                    activeIndex === index && reverseNavItems[index]
+                    activeTab === index && reverseNavItems[index]
                       ? reverseNavItems[index].src
                       : item.src
                   }
@@ -93,7 +92,7 @@ export default function BottomBar({ onTabPress }: BottomBarProps) {
                 <Text
                   style={{
                     fontFamily: "Pretendard-Regular",
-                    color: activeIndex === index ? "#000000" : "#ffffff",
+                    color: activeTab === index ? "#000000" : "#ffffff",
                     fontSize: 10,
                     textAlign: "center",
                     marginTop: 2,

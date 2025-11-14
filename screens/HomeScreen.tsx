@@ -37,10 +37,23 @@ export default function HomeScreen() {
     setActiveTab(index);
 
     // 탭 인덱스에 따라 다른 화면으로 네비게이션
-    if (index === 1) {
-      navigation.navigate('Search');
-    } else if (index === 2) {
-      navigation.navigate('Setting');
+    switch (index) {
+      case 0: // 공지사항
+        // 이미 Home 화면이므로 아무것도 하지 않음
+        break;
+      case 1: // 관심공지
+        navigation.navigate('Scrap');
+        break;
+      case 2: // AI 챗봇
+        // TODO: AI 챗봇 화면 추가
+        console.log('AI 챗봇 - 준비 중');
+        break;
+      case 3: // 검색
+        navigation.navigate('Search');
+        break;
+      case 4: // 메뉴
+        navigation.navigate('Setting');
+        break;
     }
   };
 
@@ -51,9 +64,9 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <Header />
-      {activeTab === 1 ? <Scrap /> : <All />}
+      <All />
       <MainContents />
-      <BottomBar onTabPress={handleTabPress} />
+      <BottomBar onTabPress={handleTabPress} activeTab={0} />
     </View>
   );
 }

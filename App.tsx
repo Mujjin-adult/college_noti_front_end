@@ -4,6 +4,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // 화면 컴포넌트 import
+import LoginScreen from './screens/LoginScreen';
+import EnterEmailScreen from './screens/EnterEmailScreen';
+import EnterPwScreen from './screens/EnterPwScreen';
 import HomeScreen from './screens/HomeScreen';
 import DetailScreen from './screens/DetailScreen';
 import SearchScreen from './screens/SearchScreen';
@@ -12,6 +15,9 @@ import AlertScreen from './screens/AlertScreen';
 import ScrapScreen from './screens/ScrapScreen';
 
 export type RootStackParamList = {
+  Login: undefined;
+  EnterEmail: undefined;
+  EnterPw: undefined;
   Home: undefined;
   Detail: undefined;
   Search: undefined;
@@ -27,12 +33,15 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer>
         <Stack.Navigator
-          initialRouteName="Home"
+          initialRouteName="Login"
           screenOptions={{
             headerShown: false,
             animation: 'slide_from_right',
           }}
         >
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="EnterEmail" component={EnterEmailScreen} />
+          <Stack.Screen name="EnterPw" component={EnterPwScreen} />
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Detail" component={DetailScreen} />
           <Stack.Screen name="Search" component={SearchScreen} />
