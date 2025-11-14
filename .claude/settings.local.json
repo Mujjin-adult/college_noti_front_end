@@ -9,7 +9,13 @@
       "Read(/C:\\Users\\gmlfl\\Desktop\\noti\\components\\maincontents/**)",
       "Read(/C:\\Users\\gmlfl\\Desktop\\noti\\components\\maincontents/**)",
       "Read(/C:\\Users\\gmlfl\\Desktop\\noti\\components\\maincontents/**)",
-      "Read(/C:\\Users\\gmlfl\\Desktop\\noti\\components\\topmenu/**)"
+      "Read(/C:\\Users\\gmlfl\\Desktop\\noti\\components\\topmenu/**)",
+      "Bash(node --version:*)",
+      "Bash(npm --version:*)",
+      "Bash(npm install:*)",
+      "Bash(dir:*)",
+      "Bash(npm start)",
+      "Bash(npx expo install:*)"
     ],
     "deny": [],
     "ask": []

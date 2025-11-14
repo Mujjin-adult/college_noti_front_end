@@ -1,12 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, Share, Text, TouchableOpacity, View } from "react-native";
 
 export default function Detail() {
-  const { title } = useLocalSearchParams();
-  const router = useRouter();
-
   const [bookmarkedTitles, setBookmarkedTitles] = useState<string[]>([]);
   const detailTitle = "[인천학연구원] 25-2 국가근로 장학생 모집";
   const detailText = "공지 본문 내용";

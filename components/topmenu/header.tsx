@@ -1,6 +1,5 @@
 import { useFonts } from "expo-font";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 interface HeaderProps {
@@ -9,8 +8,11 @@ interface HeaderProps {
   onBackPress?: () => void;
 }
 
-export default function Header({ showBackButton = false, onAlertToggle, onBackPress }: HeaderProps) {
-  const router = useRouter();
+export default function Header({
+  showBackButton = false,
+  onAlertToggle,
+  onBackPress,
+}: HeaderProps) {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
@@ -60,7 +62,7 @@ export default function Header({ showBackButton = false, onAlertToggle, onBackPr
         >
           {showBackButton ? (
             <TouchableOpacity
-              onPress={onBackPress || (() => router.back())}
+              onPress={onBackPress}
               style={{
                 padding: 10,
                 marginLeft: -20,
@@ -78,7 +80,7 @@ export default function Header({ showBackButton = false, onAlertToggle, onBackPr
           ) : (
             <View style={{ width: 40 }} />
           )}
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={handleBellClick}
             hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
             style={{
