@@ -1,8 +1,18 @@
-import { useFonts } from "expo-font";
-import React, { useState } from "react";
-import { Dimensions, Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useFonts } from "expo-font";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  Dimensions,
+  Image,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { getToken, messaging } from "../../config/firebaseConfig";
 
 type RootStackParamList = {
   Login: undefined;
@@ -15,13 +25,17 @@ type RootStackParamList = {
   Scrap: undefined;
 };
 
-type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
+type LoginScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "Login"
+>;
 
 export default function LoginMain() {
   const navigation = useNavigation<LoginScreenNavigationProp>();
   const { width } = Dimensions.get("window");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fcmToken, setFcmToken] = useState<string | null>(null);
 
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
@@ -32,17 +46,58 @@ export default function LoginMain() {
     "Pretendard-SemiBold": require("../../assets/fonts/Pretendard-SemiBold.ttf"),
   });
 
+  // Firebase FCM 토큰 받기 함수
+  const getFirebaseFCMToken = async () => {
+    try {
+      // VAPID 키는 Firebase Console > 프로젝트 설정 > 클라우드 메시징 > 웹 푸시 인증서에서 확인
+      const vapidKey =
+        "BBErLdE9tOoJ6FSI-89EIuR2MFdssTlXuzjp2jb3fVsOeAloxpSHrlvNcbiwjGXHs37vd467Pkqtkh_54psXoHU";
+
+      const token = await getToken(messaging, { vapidKey });
+
+      if (token) {
+        console.log("Firebase FCM 토큰:", token);
+        setFcmToken(token);
+        return token;
+      } else {
+        console.log("FCM 토큰을 가져올 수 없습니다. 알림 권한을 확인하세요.");
+        Alert.alert(
+          "알림 권한 필요",
+          "푸시 알림을 받으려면 브라우저에서 알림 권한을 허용해주세요."
+        );
+      }
+    } catch (error) {
+      console.error("FCM 토큰 가져오기 실패:", error);
+      Alert.alert(
+        "오류",
+        `FCM 토큰을 가져오는 중 오류가 발생했습니다: ${error}`
+      );
+    }
+  };
+
+  // 컴포넌트 마운트 시 FCM 토큰 받기
+  useEffect(() => {
+    // Firebase Web SDK는 웹 플랫폼에서만 작동합니다
+    if (Platform.OS === "web") {
+      getFirebaseFCMToken();
+    } else {
+    }
+  }, []);
+
   if (!fontsLoaded) return null;
 
   const handleLogin = () => {
     console.log("로그인 시도:", email, password);
+    console.log("FCM 토큰:", fcmToken);
+    // 여기서 FCM 토큰을 서버로 함께 전송
+
     // 로그인 성공 시 Home 화면으로 이동
-    navigation.navigate('Home');
+    navigation.navigate("Home");
   };
 
   const handleSignUp = () => {
     console.log("회원가입 화면으로 이동");
-    navigation.navigate('EnterEmail');
+    navigation.navigate("EnterEmail");
   };
 
   return (
@@ -58,8 +113,8 @@ export default function LoginMain() {
       <Text
         style={{
           fontFamily: "Pretendard-ExtraBold",
-          fontSize: 24,
-          color: "#3366FF",
+          fontSize: 20,
+          color: "#000000",
           textAlign: "center",
           marginBottom: 20,
         }}

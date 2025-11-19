@@ -1,0 +1,351 @@
+// 크롤러 API 기본 URL
+const API_BASE_URL = "http://localhost:8080/api";
+
+/**
+ * 공지사항 데이터 타입
+ */
+export interface Notice {
+  id: string;
+  title: string;
+  content: string;
+  url?: string;
+  externalId?: string;
+  categoryCode?: string; // 카테고리 코드
+  category?: string; // 카테고리명 (호환성 유지)
+  author?: string; // 작성자
+  publishedAt: string; // 발행일 (ISO 8601)
+  date?: string; // 호환성 유지
+  viewCount: number;
+  isImportant?: boolean; // 중요 공지 여부
+  attachments?: string; // 첨부파일
+  source?: string; // 출처
+  createdAt?: string;
+}
+
+/**
+ * 크롤링 상태 타입
+ */
+export interface CrawlerStatus {
+  isRunning: boolean;
+  lastCrawlTime?: string;
+  totalNotices?: number;
+  status?: string;
+}
+
+/**
+ * 공지사항 목록 조회
+ * @param page - 페이지 번호 (기본값: 1)
+ * @param limit - 페이지당 항목 수 (기본값: 20)
+ * @param category - 카테고리 필터 (선택사항)
+ * @returns 공지사항 목록
+ */
+export const getNotices = async (
+  page: number = 1,
+  limit: number = 20,
+  category?: string
+) => {
+  try {
+    let url = `${API_BASE_URL}/crawler/notices?page=${page}&limit=${limit}`;
+    if (category) {
+      url += `&category=${category}`;
+    }
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    // 응답이 비어있는지 확인
+    const text = await response.text();
+    if (!text) {
+      console.warn("빈 응답을 받았습니다");
+      return {
+        success: false,
+        message: "서버에서 빈 응답을 받았습니다",
+        data: [],
+        total: 0,
+      };
+    }
+
+    // JSON 파싱 시도
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (parseError) {
+      console.error("JSON 파싱 오류:", parseError);
+      console.error("응답 내용:", text);
+      return {
+        success: false,
+        message: "서버 응답을 파싱할 수 없습니다",
+        data: [],
+        total: 0,
+      };
+    }
+
+    if (!response.ok) {
+      throw new Error(data.message || "공지사항을 불러오는데 실패했습니다.");
+    }
+
+    return {
+      success: true,
+      data: data.notices || data.data || [],
+      total: data.total || 0,
+      page: data.page || page,
+    };
+  } catch (error) {
+    console.error("공지사항 조회 오류:", error);
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "공지사항을 불러오는데 실패했습니다.",
+      data: [],
+      total: 0,
+    };
+  }
+};
+
+/**
+ * 공지사항 상세 조회
+ * @param id - 공지사항 ID
+ * @returns 공지사항 상세 정보
+ */
+export const getNoticeDetail = async (id: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/crawler/notices/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    // 응답이 비어있는지 확인
+    const text = await response.text();
+    if (!text) {
+      console.warn("빈 응답을 받았습니다");
+      return {
+        success: false,
+        message: "서버에서 빈 응답을 받았습니다",
+        data: null,
+      };
+    }
+
+    // JSON 파싱 시도
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (parseError) {
+      console.error("JSON 파싱 오류:", parseError);
+      console.error("응답 내용:", text);
+      return {
+        success: false,
+        message: "서버 응답을 파싱할 수 없습니다",
+        data: null,
+      };
+    }
+
+    if (!response.ok) {
+      throw new Error(data.message || "공지사항 상세를 불러오는데 실패했습니다.");
+    }
+
+    return {
+      success: true,
+      data: data.notice || data.data || data,
+    };
+  } catch (error) {
+    console.error("공지사항 상세 조회 오류:", error);
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "공지사항 상세를 불러오는데 실패했습니다.",
+      data: null,
+    };
+  }
+};
+
+/**
+ * 공지사항 검색
+ * @param query - 검색 키워드
+ * @param page - 페이지 번호
+ * @param limit - 페이지당 항목 수
+ * @returns 검색 결과
+ */
+export const searchNotices = async (
+  query: string,
+  page: number = 1,
+  limit: number = 20
+) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/crawler/notices/search?q=${encodeURIComponent(
+        query
+      )}&page=${page}&limit=${limit}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // 응답이 비어있는지 확인
+    const text = await response.text();
+    if (!text) {
+      console.warn("빈 응답을 받았습니다");
+      return {
+        success: false,
+        message: "서버에서 빈 응답을 받았습니다",
+        data: [],
+        total: 0,
+      };
+    }
+
+    // JSON 파싱 시도
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (parseError) {
+      console.error("JSON 파싱 오류:", parseError);
+      console.error("응답 내용:", text);
+      return {
+        success: false,
+        message: "서버 응답을 파싱할 수 없습니다",
+        data: [],
+        total: 0,
+      };
+    }
+
+    if (!response.ok) {
+      throw new Error(data.message || "검색에 실패했습니다.");
+    }
+
+    return {
+      success: true,
+      data: data.notices || data.results || data.data || [],
+      total: data.total || 0,
+    };
+  } catch (error) {
+    console.error("공지사항 검색 오류:", error);
+    return {
+      success: false,
+      message:
+        error instanceof Error ? error.message : "검색에 실패했습니다.",
+      data: [],
+      total: 0,
+    };
+  }
+};
+
+/**
+ * 크롤링된 공지사항 저장 (주로 관리자용)
+ * @param notices - 저장할 공지사항 배열
+ * @returns 저장 결과
+ */
+export const saveNotices = async (notices: Partial<Notice>[]) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/crawler/notices`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ notices }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "공지사항 저장에 실패했습니다.");
+    }
+
+    return {
+      success: true,
+      message: data.message || "공지사항이 저장되었습니다.",
+      data: data,
+    };
+  } catch (error) {
+    console.error("공지사항 저장 오류:", error);
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "공지사항 저장에 실패했습니다.",
+    };
+  }
+};
+
+/**
+ * 크롤링 상태 조회
+ * @returns 크롤링 상태 정보
+ */
+export const getCrawlerStatus = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/crawler/status`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "크롤러 상태 조회에 실패했습니다.");
+    }
+
+    return {
+      success: true,
+      data: data as CrawlerStatus,
+    };
+  } catch (error) {
+    console.error("크롤러 상태 조회 오류:", error);
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "크롤러 상태 조회에 실패했습니다.",
+      data: null,
+    };
+  }
+};
+
+/**
+ * 크롤러 헬스 체크
+ * @returns 헬스 상태
+ */
+export const checkCrawlerHealth = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/crawler/health`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "헬스 체크에 실패했습니다.");
+    }
+
+    return {
+      success: true,
+      healthy: data.healthy || data.status === "ok",
+      message: data.message || "정상",
+    };
+  } catch (error) {
+    console.error("헬스 체크 오류:", error);
+    return {
+      success: false,
+      healthy: false,
+      message:
+        error instanceof Error ? error.message : "헬스 체크에 실패했습니다.",
+    };
+  }
+};

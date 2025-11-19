@@ -1,8 +1,16 @@
-import { useFonts } from "expo-font";
-import React, { useEffect, useState } from "react";
-import { Dimensions, Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useFonts } from "expo-font";
+import React, { useState } from "react";
+import {
+  Alert,
+  Dimensions,
+  Image,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 type RootStackParamList = {
   Login: undefined;
@@ -16,15 +24,15 @@ type RootStackParamList = {
   Scrap: undefined;
 };
 
-type EnterEmailScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'EnterEmail'>;
+type EnterEmailScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "EnterEmail"
+>;
 
 export default function EnterEmail() {
   const navigation = useNavigation<EnterEmailScreenNavigationProp>();
   const { width } = Dimensions.get("window");
   const [email, setEmail] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
-  const [isCodeSent, setIsCodeSent] = useState(false);
-  const [timer, setTimer] = useState(0);
 
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
@@ -35,38 +43,17 @@ export default function EnterEmail() {
     "Pretendard-SemiBold": require("../../assets/fonts/Pretendard-SemiBold.ttf"),
   });
 
-  // 타이머 카운트다운
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isCodeSent && timer > 0) {
-      interval = setInterval(() => {
-        setTimer((prevTimer) => prevTimer - 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isCodeSent, timer]);
-
   if (!fontsLoaded) return null;
 
-  const handleSendVerification = () => {
-    if (!isCodeSent) {
-      // 인증번호 발송
-      console.log("인증번호 발송:", email);
-      setIsCodeSent(true);
-      setTimer(180); // 3분 = 180초
-    } else {
-      // 인증하기
-      console.log("인증 확인:", verificationCode);
-      // 인증 성공 시 비밀번호 설정 화면으로 이동
-      navigation.navigate('EnterPw');
+  const handleContinue = () => {
+    // 이메일 유효성 검사
+    if (!email || !email.includes("@")) {
+      Alert.alert("오류", "유효한 이메일 주소를 입력해주세요.");
+      return;
     }
-  };
 
-  // 타이머 포맷 (mm:ss)
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    // 이메일을 다음 화면으로 전달
+    navigation.navigate("EnterPw", { email } as any);
   };
 
   return (
@@ -82,8 +69,8 @@ export default function EnterEmail() {
       <Text
         style={{
           fontFamily: "Pretendard-ExtraBold",
-          fontSize: 24,
-          color: "#3366FF",
+          fontSize: 20,
+          color: "#000000",
           textAlign: "center",
           marginBottom: 20,
         }}
@@ -144,60 +131,12 @@ export default function EnterEmail() {
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
-          editable={!isCodeSent}
         />
       </View>
 
-      {/* 인증번호 입력칸 (인증번호 발송 후 표시) */}
-      {isCodeSent && (
-        <View style={{ marginBottom: 20 }}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <Text
-              style={{
-                fontFamily: "Pretendard-SemiBold",
-                fontSize: 14,
-                color: "#333333",
-              }}
-            >
-              인증번호
-            </Text>
-            {timer > 0 && (
-              <Text
-                style={{
-                  fontFamily: "Pretendard-Bold",
-                  fontSize: 14,
-                  color: "#FF3366",
-                }}
-              >
-                {formatTime(timer)}
-              </Text>
-            )}
-          </View>
-          <TextInput
-            style={{
-              fontFamily: "Pretendard-Regular",
-              fontSize: 16,
-              borderWidth: 1,
-              borderColor: "#DDDDDD",
-              borderRadius: 10,
-              paddingHorizontal: 15,
-              paddingVertical: 12,
-              backgroundColor: "#FAFAFA",
-            }}
-            placeholder="인증번호를 입력하세요"
-            placeholderTextColor="#AAAAAA"
-            value={verificationCode}
-            onChangeText={setVerificationCode}
-            keyboardType="number-pad"
-            maxLength={6}
-            secureTextEntry
-          />
-        </View>
-      )}
-
-      {/* 인증번호 발송하기 / 인증하기 버튼 */}
+      {/* 계속하기 버튼 */}
       <TouchableOpacity
-        onPress={handleSendVerification}
+        onPress={handleContinue}
         style={{
           backgroundColor: "#3366FF",
           borderRadius: 10,
@@ -213,7 +152,7 @@ export default function EnterEmail() {
             color: "#FFFFFF",
           }}
         >
-          {isCodeSent ? "인증하기" : "인증번호 발송하기"}
+          계속하기
         </Text>
       </TouchableOpacity>
 

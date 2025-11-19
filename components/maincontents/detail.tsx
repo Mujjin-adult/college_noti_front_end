@@ -1,11 +1,31 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRoute } from "@react-navigation/native";
 import { useEffect, useState } from "react";
-import { Image, Share, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, Linking, ScrollView, Share, Text, TouchableOpacity, View } from "react-native";
+import { Notice, getNoticeDetail } from "../../services/crawlerAPI";
 
 export default function Detail() {
+  const route = useRoute();
+  const params = route.params as { notice?: Notice } | undefined;
+
   const [bookmarkedTitles, setBookmarkedTitles] = useState<string[]>([]);
-  const detailTitle = "[인천학연구원] 25-2 국가근로 장학생 모집";
-  const detailText = "공지 본문 내용";
+  const [notice, setNotice] = useState<Notice | null>(params?.notice || null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // 공지사항 상세 정보 불러오기
+  const fetchNoticeDetail = async (id: string) => {
+    setIsLoading(true);
+    try {
+      const result = await getNoticeDetail(id);
+      if (result.success && result.data) {
+        setNotice(result.data);
+      }
+    } catch (error) {
+      console.error("공지사항 상세 조회 오류:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const loadBookmarks = async () => {
@@ -19,6 +39,11 @@ export default function Detail() {
       }
     };
     loadBookmarks();
+
+    // 상세 정보 불러오기 (필요한 경우)
+    if (notice && !notice.content) {
+      fetchNoticeDetail(notice.id);
+    }
   }, []);
 
   const handleBookmark = async (title: string) => {
@@ -110,10 +135,32 @@ export default function Detail() {
     );
   };
 
+  if (!notice) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text style={{ fontFamily: "Pretendard-Light", fontSize: 16, color: "#999" }}>
+          공지사항을 찾을 수 없습니다
+        </Text>
+      </View>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#3366FF" />
+        <Text style={{ fontFamily: "Pretendard-Regular", fontSize: 14, marginTop: 10 }}>
+          불러오는 중...
+        </Text>
+      </View>
+    );
+  }
+
   return (
-    <View
+    <ScrollView
       style={{
         flex: 1,
+        backgroundColor: "white",
       }}
     >
       <View
@@ -131,15 +178,29 @@ export default function Detail() {
             flex: 1,
           }}
         >
-          <Text
-            style={{
-              fontFamily: "Pretendard-regular",
-              fontSize: 15,
-              marginBottom: 3,
-            }}
-          >
-            {detailTitle}
-          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 3 }}>
+            {notice.isImportant && (
+              <Text
+                style={{
+                  fontFamily: "Pretendard-Bold",
+                  fontSize: 12,
+                  color: "#FF3B30",
+                  marginRight: 6,
+                }}
+              >
+                [중요]
+              </Text>
+            )}
+            <Text
+              style={{
+                fontFamily: "Pretendard-regular",
+                fontSize: 15,
+                flex: 1,
+              }}
+            >
+              {notice.title}
+            </Text>
+          </View>
           <Text
             style={{
               fontFamily: "Pretendard-Light",
@@ -148,23 +209,36 @@ export default function Detail() {
               marginBottom: 0,
             }}
           >
-            2025-09-28
-            <Text
-              style={{
-                fontFamily: "Pretendard-Light",
-                fontSize: 12,
-                color: "#ffffff",
-                marginLeft: 8,
-                paddingHorizontal: 4,
-                paddingTop: 1,
-                paddingBottom: 1,
-                lineHeight: 14,
-                borderRadius: 5,
-                backgroundColor: "#8e8e8e",
-              }}
-            >
-              전공
-            </Text>
+            {new Date(notice.publishedAt || notice.date || new Date()).toLocaleDateString("ko-KR")}
+            {notice.author && (
+              <Text
+                style={{
+                  fontFamily: "Pretendard-Light",
+                  fontSize: 12,
+                  marginLeft: 8,
+                }}
+              >
+                · {notice.author}
+              </Text>
+            )}
+            {(notice.categoryCode || notice.category) && (
+              <Text
+                style={{
+                  fontFamily: "Pretendard-Light",
+                  fontSize: 12,
+                  color: "#ffffff",
+                  marginLeft: 8,
+                  paddingHorizontal: 4,
+                  paddingTop: 1,
+                  paddingBottom: 1,
+                  lineHeight: 14,
+                  borderRadius: 5,
+                  backgroundColor: "#8e8e8e",
+                }}
+              >
+                {notice.categoryCode || notice.category}
+              </Text>
+            )}
             <Text
               style={{
                 fontFamily: "Pretendard-Light",
@@ -174,7 +248,7 @@ export default function Detail() {
                 marginLeft: 8,
               }}
             >
-              조회 123456
+              조회 {notice.viewCount || 0}
             </Text>
           </Text>
         </View>
@@ -184,10 +258,10 @@ export default function Detail() {
             alignItems: "center",
           }}
         >
-          <TouchableOpacity onPress={() => handleBookmark(detailTitle)}>
+          <TouchableOpacity onPress={() => handleBookmark(notice.title)}>
             <Image
               source={
-                bookmarkedTitles.includes(detailTitle)
+                bookmarkedTitles.includes(notice.title)
                   ? require("../../assets/images/bookmark2.png")
                   : require("../../assets/images/bookmark.png")
               }
@@ -199,7 +273,7 @@ export default function Detail() {
               }}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleShare(detailTitle)}>
+          <TouchableOpacity onPress={() => handleShare(notice.title)}>
             <Image
               source={require("../../assets/images/export.png")}
               style={{
@@ -216,29 +290,131 @@ export default function Detail() {
         style={{
           flex: 1,
           marginTop: 40,
+          marginBottom: 40,
         }}
       >
         <Text
           style={{
             fontFamily: "Pretendard-Bold",
             fontSize: 20,
-            marginLeft: 10,
+            marginLeft: 15,
+            marginRight: 15,
+            marginBottom: 20,
           }}
         >
-          {detailTitle}
+          {notice.title}
         </Text>
         <Text
           style={{
             fontFamily: "Pretendard-regular",
-            fontSize: 18,
-            marginTop: 20,
-            marginLeft: 10,
-            marginRight: 20,
+            fontSize: 16,
+            marginLeft: 15,
+            marginRight: 15,
+            lineHeight: 24,
           }}
         >
-          {detailText}
+          {notice.content || "내용을 불러올 수 없습니다."}
         </Text>
+
+        {/* 첨부파일 */}
+        {notice.attachments && (
+          <View
+            style={{
+              marginTop: 20,
+              marginLeft: 15,
+              marginRight: 15,
+              padding: 15,
+              backgroundColor: "#f9f9f9",
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: "#e0e0e0",
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Pretendard-Bold",
+                fontSize: 14,
+                marginBottom: 8,
+                color: "#333",
+              }}
+            >
+              첨부파일
+            </Text>
+            <Text
+              style={{
+                fontFamily: "Pretendard-Regular",
+                fontSize: 13,
+                color: "#666",
+                lineHeight: 20,
+              }}
+            >
+              {notice.attachments}
+            </Text>
+          </View>
+        )}
+
+        {/* 출처 */}
+        {notice.source && (
+          <View
+            style={{
+              marginTop: 10,
+              marginLeft: 15,
+              marginRight: 15,
+              padding: 12,
+              backgroundColor: "#f0f7ff",
+              borderRadius: 6,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Pretendard-Regular",
+                fontSize: 12,
+                color: "#3366FF",
+              }}
+            >
+              출처: {notice.source}
+            </Text>
+          </View>
+        )}
+
+        {/* 원문 보기 */}
+        {notice.url && (
+          <TouchableOpacity
+            style={{
+              marginTop: 20,
+              marginLeft: 15,
+              marginRight: 15,
+              padding: 15,
+              backgroundColor: "#3366FF",
+              borderRadius: 8,
+            }}
+            onPress={async () => {
+              try {
+                const supported = await Linking.canOpenURL(notice.url!);
+                if (supported) {
+                  await Linking.openURL(notice.url!);
+                } else {
+                  alert("링크를 열 수 없습니다.");
+                }
+              } catch (error) {
+                console.error("URL 열기 오류:", error);
+                alert("링크를 여는 중 오류가 발생했습니다.");
+              }
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Pretendard-Bold",
+                fontSize: 14,
+                color: "#ffffff",
+                textAlign: "center",
+              }}
+            >
+              원문 보기
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
-    </View>
+    </ScrollView>
   );
 }

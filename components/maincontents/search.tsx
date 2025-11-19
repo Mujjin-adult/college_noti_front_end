@@ -1,9 +1,19 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import React, { useEffect, useState } from "react";
-import { Image, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Notice, searchNotices } from "../../services/crawlerAPI";
 
 export default function Search() {
+  const navigation = useNavigation();
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
     "Pretendard-ExtraBold": require("../../assets/fonts/Pretendard-ExtraBold.ttf"),
@@ -13,9 +23,36 @@ export default function Search() {
   });
 
   const [searchText, setSearchText] = useState("");
+  const [searchResults, setSearchResults] = useState<Notice[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
-  const handleSearch = () => {
-    console.log("검색:", searchText);
+  const handleSearch = async () => {
+    if (!searchText.trim()) {
+      return;
+    }
+
+    setIsSearching(true);
+    setHasSearched(true);
+
+    try {
+      const result = await searchNotices(searchText.trim());
+      if (result.success) {
+        setSearchResults(result.data);
+      } else {
+        console.error("검색 실패:", result.message);
+        setSearchResults([]);
+      }
+    } catch (error) {
+      console.error("검색 오류:", error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleNoticePress = (notice: Notice) => {
+    (navigation as any).navigate("detail", { notice });
   };
 
   if (!fontsLoaded) return null;
@@ -73,8 +110,31 @@ export default function Search() {
       </View>
 
       {/* 검색 결과 영역 */}
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", marginBottom: 100 }}>
-        {searchText === "" ? (
+      {isSearching ? (
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <ActivityIndicator size="large" color="#3366FF" />
+          <Text
+            style={{
+              fontFamily: "Pretendard-Regular",
+              fontSize: 14,
+              marginTop: 10,
+              color: "#666",
+            }}
+          >
+            검색 중...
+          </Text>
+        </View>
+      ) : !hasSearched ? (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: 100,
+          }}
+        >
           <Text
             style={{
               fontFamily: "Pretendard-Light",
@@ -84,18 +144,105 @@ export default function Search() {
           >
             검색어를 입력해주세요
           </Text>
-        ) : (
-          <Text
-            style={{
-              fontFamily: "Pretendard-Light",
-              fontSize: 16,
-              color: "#999",
-            }}
-          >
-            "{searchText}"에 대한 검색 결과
-          </Text>
-        )}
-      </View>
+        </View>
+      ) : (
+        <ScrollView style={{ flex: 1 }}>
+          {searchResults.length > 0 ? (
+            <>
+              <Text
+                style={{
+                  fontFamily: "Pretendard-Regular",
+                  fontSize: 14,
+                  color: "#666",
+                  marginBottom: 15,
+                }}
+              >
+                검색 결과 {searchResults.length}개
+              </Text>
+
+              {searchResults.map((notice) => (
+                <TouchableOpacity
+                  key={notice.id}
+                  onPress={() => handleNoticePress(notice)}
+                  style={{
+                    backgroundColor: "#ffffff",
+                    borderRadius: 12,
+                    paddingHorizontal: 20,
+                    paddingVertical: 15,
+                    marginBottom: 10,
+                    elevation: 2,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontFamily: "Pretendard-Regular",
+                      fontSize: 15,
+                      color: "#000000",
+                      marginBottom: 8,
+                    }}
+                    numberOfLines={2}
+                  >
+                    {notice.title}
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: "Pretendard-Light",
+                        fontSize: 12,
+                        color: "#666",
+                      }}
+                    >
+                      {new Date(
+                        notice.date || notice.publishedAt
+                      ).toLocaleDateString("ko-KR")}
+                    </Text>
+                    {notice.category && (
+                      <Text
+                        style={{
+                          fontFamily: "Pretendard-Light",
+                          fontSize: 11,
+                          color: "#ffffff",
+                          marginLeft: 8,
+                          paddingHorizontal: 6,
+                          paddingVertical: 2,
+                          borderRadius: 4,
+                          backgroundColor: "#8e8e8e",
+                        }}
+                      >
+                        {notice.category}
+                      </Text>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </>
+          ) : (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: 100,
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: "Pretendard-Light",
+                  fontSize: 16,
+                  color: "#999",
+                }}
+              >
+                "{searchText}"에 대한 검색 결과가 없습니다
+              </Text>
+            </View>
+          )}
+        </ScrollView>
+      )}
     </View>
   );
 }

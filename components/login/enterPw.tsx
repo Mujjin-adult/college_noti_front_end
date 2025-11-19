@@ -1,8 +1,15 @@
-import { useFonts } from "expo-font";
-import React, { useState } from "react";
-import { Dimensions, Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useFonts } from "expo-font";
+import React, { useState } from "react";
+import {
+  Dimensions,
+  Image,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 type RootStackParamList = {
   Login: undefined;
@@ -16,7 +23,10 @@ type RootStackParamList = {
   Scrap: undefined;
 };
 
-type EnterPwScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'EnterPw'>;
+type EnterPwScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "EnterPw"
+>;
 
 export default function EnterPw() {
   const navigation = useNavigation<EnterPwScreenNavigationProp>();
@@ -42,7 +52,7 @@ export default function EnterPw() {
     }
     console.log("비밀번호 설정:", password);
     // 회원가입 완료 후 로그인 화면으로 이동
-    navigation.navigate('Login');
+    navigation.navigate("Login");
   };
 
   return (
@@ -58,8 +68,8 @@ export default function EnterPw() {
       <Text
         style={{
           fontFamily: "Pretendard-ExtraBold",
-          fontSize: 24,
-          color: "#3366FF",
+          fontSize: 20,
+          color: "#000000",
           textAlign: "center",
           marginBottom: 20,
         }}
