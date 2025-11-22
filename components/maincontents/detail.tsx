@@ -1,9 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRoute } from "@react-navigation/native";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Image, Linking, ScrollView, Share, Text, TouchableOpacity, View } from "react-native";
-import { WebView } from "react-native-webview";
+import { ActivityIndicator, Image, Linking, Platform, ScrollView, Share, Text, TouchableOpacity, View } from "react-native";
 import { Notice, getNoticeDetail } from "../../services/crawlerAPI";
+
+// 네이티브 플랫폼에서만 WebView 사용
+let WebView: any = null;
+if (Platform.OS !== "web") {
+  WebView = require("react-native-webview").WebView;
+}
 
 export default function Detail() {
   const route = useRoute();
@@ -250,22 +255,32 @@ export default function Detail() {
           </View>
         )}
 
-        {/* WebView */}
-        <WebView
-          source={{ uri: notice.url }}
-          style={{ flex: 1 }}
-          onLoadStart={() => setWebViewLoading(true)}
-          onLoadEnd={() => setWebViewLoading(false)}
-          onError={(syntheticEvent) => {
-            const { nativeEvent } = syntheticEvent;
-            console.error("WebView 오류:", nativeEvent);
-            setWebViewLoading(false);
-          }}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-          startInLoadingState={true}
-          scalesPageToFit={true}
-        />
+        {/* WebView (네이티브) 또는 iframe (웹) */}
+        {Platform.OS === "web" ? (
+          <iframe
+            src={notice.url}
+            style={{ flex: 1, border: "none", width: "100%", height: "100%" }}
+            onLoad={() => setWebViewLoading(false)}
+          />
+        ) : (
+          WebView && (
+            <WebView
+              source={{ uri: notice.url }}
+              style={{ flex: 1 }}
+              onLoadStart={() => setWebViewLoading(true)}
+              onLoadEnd={() => setWebViewLoading(false)}
+              onError={(syntheticEvent: any) => {
+                const { nativeEvent } = syntheticEvent;
+                console.error("WebView 오류:", nativeEvent);
+                setWebViewLoading(false);
+              }}
+              javaScriptEnabled={true}
+              domStorageEnabled={true}
+              startInLoadingState={true}
+              scalesPageToFit={true}
+            />
+          )
+        )}
       </View>
     );
   }
@@ -294,18 +309,6 @@ export default function Detail() {
           }}
         >
           <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 3 }}>
-            {notice.isImportant && (
-              <Text
-                style={{
-                  fontFamily: "Pretendard-Bold",
-                  fontSize: 12,
-                  color: "#FF3B30",
-                  marginRight: 6,
-                }}
-              >
-                [중요]
-              </Text>
-            )}
             <Text
               style={{
                 fontFamily: "Pretendard-regular",

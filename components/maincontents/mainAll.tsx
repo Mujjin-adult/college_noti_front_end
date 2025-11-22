@@ -21,18 +21,18 @@ import { getNotices, Notice } from "../../services/crawlerAPI";
 const MOCK_NOTICES: Notice[] = [
   {
     id: "mock-1",
-    title: "[학사] 2025학년도 1학기 수강신청 안내",
-    content: "2025학년도 1학기 수강신청 일정 및 유의사항을 안내드립니다.\n\n1. 수강신청 기간: 2025.02.24(월) ~ 02.28(금)\n2. 수강정정 기간: 2025.03.03(월) ~ 03.07(금)\n\n자세한 내용은 학사공지를 확인해주세요.",
+    title: "[졸업논문] 2025-2학기 졸업논문(실기발표) 심사 대상자 심사일정 안내",
+    content: "이 공지는 졸업논문 심사를 앞둔 학생들을 대상으로 안내드립니다.\n\n본인의 심사일정을 잘 확인하시어 심사일정에 차질이 없도록 준비하시기 바랍니다.\n\n추후 일정 변경 시 문자로 안내 예정입니다.\n\n학과사무실 연락처: 032-835-8962",
     categoryCode: "학사",
-    publishedAt: new Date().toISOString(),
-    viewCount: 1234,
-    isImportant: true,
-    author: "학사팀",
+    publishedAt: "2025-11-10T00:00:00.000Z",
+    viewCount: 965,
+    isImportant: false,
+    author: "정보통신공학과",
     url: "https://www.inu.ac.kr/ite/3472/subview.do?enc=Zm5jdDF8QEB8JTJGYmJzJTJGaXRlJTJGMzczJTJGNDE0OTAxJTJGYXJ0Y2xWaWV3LmRvJTNG",
   },
   {
     id: "mock-2",
-    title: "[장학금] 2025-1학기 교내장학금 신청 안내",
+    title: "2025-1학기 교내장학금 신청 안내",
     content: "2025학년도 1학기 교내장학금 신청 안내입니다.\n\n신청기간: 2025.02.17(월) ~ 02.21(금)\n신청방법: 포털시스템 > 장학금 신청",
     categoryCode: "장학금",
     publishedAt: new Date(Date.now() - 86400000).toISOString(), // 하루 전
@@ -43,7 +43,7 @@ const MOCK_NOTICES: Notice[] = [
   },
   {
     id: "mock-3",
-    title: "[일반] 2025년 캠퍼스 축제 자원봉사자 모집",
+    title: "2025년 캠퍼스 축제 자원봉사자 모집",
     content: "2025년 봄 캠퍼스 축제 자원봉사자를 모집합니다.\n\n모집기간: 2025.03.01 ~ 03.15\n활동기간: 2025.05.15 ~ 05.17",
     categoryCode: "일반/행사/모집",
     publishedAt: new Date(Date.now() - 172800000).toISOString(), // 이틀 전
@@ -160,7 +160,7 @@ export default function MainContents({ category, onCategoriesExtracted }: MainCo
         setReadTitles(updated);
         await AsyncStorage.setItem("readTitles", JSON.stringify(updated));
       }
-      (navi as any).navigate("detail", { notice });
+      (navi as any).navigate("Detail", { notice });
     } catch (error) {
       console.error("제목 클릭 처리 중 오류:", error);
     }
@@ -410,6 +410,18 @@ export default function MainContents({ category, onCategoriesExtracted }: MainCo
                                     }}
                                   >
                                     {notice.categoryCode || notice.category}
+                                  </Text>
+                                )}
+                                {notice.viewCount !== undefined && (
+                                  <Text
+                                    style={{
+                                      fontFamily: "Pretendard-Light",
+                                      fontSize: 10,
+                                      color: "#999",
+                                      marginLeft: 8,
+                                    }}
+                                  >
+                                    조회 {notice.viewCount}
                                   </Text>
                                 )}
                               </View>
