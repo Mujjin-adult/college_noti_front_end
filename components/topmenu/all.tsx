@@ -1,8 +1,13 @@
 import { useFonts } from "expo-font";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
-export default function All() {
+interface AllProps {
+  onCategoryChange?: (category: string) => void;
+  availableCategories?: string[]; // 실제 존재하는 카테고리 목록
+}
+
+export default function All({ onCategoryChange, availableCategories }: AllProps) {
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
     "Pretendard-ExtraBold": require("../../assets/fonts/Pretendard-ExtraBold.ttf"),
@@ -10,7 +15,9 @@ export default function All() {
     "Pretendard-Light": require("../../assets/fonts/Pretendard-Light.ttf"),
     "Pretendard-Regular": require("../../assets/fonts/Pretendard-Regular.ttf"),
   });
-  const categories = [
+
+  // 기본 카테고리 목록
+  const defaultCategories = [
     "학사",
     "학점교류",
     "일반/행사/모집",
@@ -21,7 +28,25 @@ export default function All() {
     "채용정보",
   ];
 
-  const [selected, setSelected] = useState("학과");
+  // 실제 데이터에서 추출한 카테고리 또는 기본 카테고리 사용
+  const categories = availableCategories && availableCategories.length > 0
+    ? availableCategories
+    : defaultCategories;
+
+  const [selected, setSelected] = useState(categories[0]);
+
+  // 카테고리 목록이 변경되면 첫 번째 카테고리 선택
+  useEffect(() => {
+    if (categories.length > 0 && !categories.includes(selected)) {
+      setSelected(categories[0]);
+      onCategoryChange?.(categories[0]);
+    }
+  }, [categories]);
+
+  const handleCategoryPress = (category: string) => {
+    setSelected(category);
+    onCategoryChange?.(category);
+  };
 
   if (!fontsLoaded) return null;
 
@@ -56,7 +81,7 @@ export default function All() {
             {categories.map((category) => (
               <TouchableOpacity
                 key={category}
-                onPress={() => setSelected(category)}
+                onPress={() => handleCategoryPress(category)}
               >
                 <View
                   style={{

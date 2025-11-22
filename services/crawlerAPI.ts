@@ -2,6 +2,39 @@
 const API_BASE_URL = "http://localhost:8080/api";
 
 /**
+ * AsyncStorage에서 JWT 토큰 가져오기
+ */
+const getAuthToken = async (): Promise<string | null> => {
+  try {
+    const { default: AsyncStorage } = await import("@react-native-async-storage/async-storage");
+    return await AsyncStorage.getItem("authToken");
+  } catch (error) {
+    console.error("토큰 조회 오류:", error);
+    return null;
+  }
+};
+
+/**
+ * 인증 헤더 포함한 fetch 요청
+ */
+const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
+  const token = await getAuthToken();
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  return fetch(url, {
+    ...options,
+    headers,
+  });
+};
+
+/**
  * 공지사항 데이터 타입
  */
 export interface Notice {
@@ -50,11 +83,8 @@ export const getNotices = async (
       url += `&category=${category}`;
     }
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
     });
 
     // 응답이 비어있는지 확인
@@ -88,11 +118,43 @@ export const getNotices = async (
       throw new Error(data.message || "공지사항을 불러오는데 실패했습니다.");
     }
 
+    // 백엔드 응답 구조 처리: { success, message, data: { content, totalElements, ... }, timestamp }
+    if (data.success === false) {
+      return {
+        success: false,
+        message: data.message || "공지사항을 불러오는데 실패했습니다.",
+        data: [],
+        total: 0,
+      };
+    }
+
+    // Spring Page 객체 처리: data.data.content가 실제 배열
+    let notices = [];
+    let total = 0;
+
+    if (data.data && data.data.content) {
+      // Spring Page 응답: { data: { content: [...], totalElements: 10 } }
+      notices = data.data.content;
+      total = data.data.totalElements || 0;
+    } else if (Array.isArray(data.data)) {
+      // 배열 직접 반환: { data: [...] }
+      notices = data.data;
+      total = notices.length;
+    } else if (data.content) {
+      // Page 객체 직접: { content: [...], totalElements: 10 }
+      notices = data.content;
+      total = data.totalElements || 0;
+    } else if (data.notices) {
+      // 커스텀 응답: { notices: [...] }
+      notices = data.notices;
+      total = data.total || notices.length;
+    }
+
     return {
       success: true,
-      data: data.notices || data.data || [],
-      total: data.total || 0,
-      page: data.page || page,
+      data: notices,
+      total: total,
+      page: data.data?.number || page,
     };
   } catch (error) {
     console.error("공지사항 조회 오류:", error);
@@ -115,11 +177,8 @@ export const getNotices = async (
  */
 export const getNoticeDetail = async (id: string) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/crawler/notices/${id}`, {
+    const response = await authenticatedFetch(`${API_BASE_URL}/crawler/notices/${id}`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
     });
 
     // 응답이 비어있는지 확인
@@ -181,15 +240,12 @@ export const searchNotices = async (
   limit: number = 20
 ) => {
   try {
-    const response = await fetch(
+    const response = await authenticatedFetch(
       `${API_BASE_URL}/crawler/notices/search?q=${encodeURIComponent(
         query
       )}&page=${page}&limit=${limit}`,
       {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
       }
     );
 

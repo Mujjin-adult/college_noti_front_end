@@ -15,7 +15,7 @@ import {
 type RootStackParamList = {
   Login: undefined;
   EnterEmail: undefined;
-  EnterPw: undefined;
+  EnterPw: { email: string; name: string; studentId: string };
   Home: undefined;
   Detail: undefined;
   Search: undefined;
@@ -33,6 +33,8 @@ export default function EnterEmail() {
   const navigation = useNavigation<EnterEmailScreenNavigationProp>();
   const { width } = Dimensions.get("window");
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [studentId, setStudentId] = useState("");
 
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
@@ -46,14 +48,22 @@ export default function EnterEmail() {
   if (!fontsLoaded) return null;
 
   const handleContinue = () => {
-    // 이메일 유효성 검사
+    // 유효성 검사
+    if (!name) {
+      Alert.alert("오류", "이름을 입력해주세요.");
+      return;
+    }
+    if (!studentId) {
+      Alert.alert("오류", "학번을 입력해주세요.");
+      return;
+    }
     if (!email || !email.includes("@")) {
       Alert.alert("오류", "유효한 이메일 주소를 입력해주세요.");
       return;
     }
 
-    // 이메일을 다음 화면으로 전달
-    navigation.navigate("EnterPw", { email } as any);
+    // 데이터를 다음 화면으로 전달
+    navigation.navigate("EnterPw", { email, name, studentId });
   };
 
   return (
@@ -90,17 +100,78 @@ export default function EnterEmail() {
         }}
       />
 
-      {/* 이메일 인증 텍스트 */}
+      {/* 회원가입 텍스트 */}
       <Text
         style={{
           fontFamily: "Pretendard-Bold",
           fontSize: 24,
           color: "#333333",
-          marginBottom: 40,
+          marginBottom: 30,
         }}
       >
-        이메일 인증
+        회원가입
       </Text>
+
+      {/* 이름 입력칸 */}
+      <View style={{ marginBottom: 15 }}>
+        <Text
+          style={{
+            fontFamily: "Pretendard-SemiBold",
+            fontSize: 14,
+            color: "#333333",
+            marginBottom: 8,
+          }}
+        >
+          이름
+        </Text>
+        <TextInput
+          style={{
+            fontFamily: "Pretendard-Regular",
+            fontSize: 16,
+            borderWidth: 1,
+            borderColor: "#DDDDDD",
+            borderRadius: 10,
+            paddingHorizontal: 15,
+            paddingVertical: 12,
+            backgroundColor: "#FAFAFA",
+          }}
+          placeholder="이름을 입력하세요"
+          placeholderTextColor="#AAAAAA"
+          value={name}
+          onChangeText={setName}
+        />
+      </View>
+
+      {/* 학번 입력칸 */}
+      <View style={{ marginBottom: 15 }}>
+        <Text
+          style={{
+            fontFamily: "Pretendard-SemiBold",
+            fontSize: 14,
+            color: "#333333",
+            marginBottom: 8,
+          }}
+        >
+          학번
+        </Text>
+        <TextInput
+          style={{
+            fontFamily: "Pretendard-Regular",
+            fontSize: 16,
+            borderWidth: 1,
+            borderColor: "#DDDDDD",
+            borderRadius: 10,
+            paddingHorizontal: 15,
+            paddingVertical: 12,
+            backgroundColor: "#FAFAFA",
+          }}
+          placeholder="학번을 입력하세요"
+          placeholderTextColor="#AAAAAA"
+          value={studentId}
+          onChangeText={setStudentId}
+          keyboardType="number-pad"
+        />
+      </View>
 
       {/* 이메일 입력칸 */}
       <View style={{ marginBottom: 20 }}>

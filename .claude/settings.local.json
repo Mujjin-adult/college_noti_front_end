@@ -25,7 +25,11 @@
       "Bash(del \".\\nul\")",
       "Bash(git clean:*)",
       "Bash(findstr:*)",
-      "Bash(npx openapi-generator-cli generate:*)"
+      "Bash(npx openapi-generator-cli generate:*)",
+      "Bash(git -C \"c:\\Users\\gmlfl\\Desktop\\noti\" show 91cfe2b --stat)",
+      "Bash(git -C \"c:\\Users\\gmlfl\\Desktop\\noti\" diff components/login/enterEmail.tsx)",
+      "Bash(node test-api.js:*)",
+      "Bash(node test-swagger-comparison.js:*)"
     ],
     "deny": [],
     "ask": []

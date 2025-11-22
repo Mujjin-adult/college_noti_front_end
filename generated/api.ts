@@ -193,8 +193,8 @@ export interface SignUpRequest {
 }
 export interface SortObject {
     'empty'?: boolean;
-    'sorted'?: boolean;
     'unsorted'?: boolean;
+    'sorted'?: boolean;
 }
 export interface SubscribeRequest {
     'categoryId': number;

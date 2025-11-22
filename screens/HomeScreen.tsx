@@ -4,9 +4,6 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../App";
 
-// 스플래쉬 화면
-import Splash from "../components/splash/splash";
-
 // 메인 콘텐츠
 import MainContents from "@/components/maincontents/mainAll";
 
@@ -22,16 +19,9 @@ type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'H
 
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
-  const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState<number>(0); // 0: 공지사항, 1: 관심공지
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 3000); // 3초 후 스플래쉬에서 메인으로 전환
-
-    return () => clearTimeout(timer);
-  }, []);
+  const [selectedCategory, setSelectedCategory] = useState<string>("학사"); // 선택된 카테고리
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]); // 실제 존재하는 카테고리
 
   const handleTabPress = (index: number) => {
     setActiveTab(index);
@@ -57,15 +47,17 @@ export default function HomeScreen() {
     }
   };
 
-  if (showSplash) {
-    return <Splash />;
-  }
-
   return (
     <View style={styles.container}>
       <Header />
-      <All />
-      <MainContents />
+      <All
+        onCategoryChange={setSelectedCategory}
+        availableCategories={availableCategories}
+      />
+      <MainContents
+        category={selectedCategory}
+        onCategoriesExtracted={setAvailableCategories}
+      />
       <BottomBar onTabPress={handleTabPress} activeTab={0} />
     </View>
   );

@@ -1,27 +1,26 @@
-import { initializeApp } from 'firebase/app';
-import { getMessaging, getToken } from 'firebase/messaging';
-import { getAuth } from 'firebase/auth';
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getMessaging, getToken } from "firebase/messaging";
 
-// Firebase 프로젝트 설정
-// Firebase Console (https://console.firebase.google.com/)에서
-// 프로젝트 설정 > 일반 > 내 앱 > SDK 설정 및 구성에서 복사하세요
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
-  measurementId: "YOUR_MEASUREMENT_ID" // 선택사항
+  apiKey: "AIzaSyCVcs_cgLTlzOreaM64wGEk8gBnJYJH5Rw",
+  authDomain: "notifront-d3e4e.firebaseapp.com",
+  projectId: "notifront-d3e4e",
+  storageBucket: "notifront-d3e4e.firebasestorage.app",
+  messagingSenderId: "161946781148",
+  appId: "1:161946781148:web:9e4e90fcfe2c112757bb19",
+  measurementId: "G-7EQJ2E1CZK",
 };
 
-// Firebase 초기화
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// FCM 메시징 초기화
-const messaging = getMessaging(app);
 
 // Firebase Authentication 초기화
 const auth = getAuth(app);
 
-export { messaging, getToken, auth };
+// FCM 메시징 초기화
+const messaging = getMessaging(app);
+
+export { auth, messaging, getToken };

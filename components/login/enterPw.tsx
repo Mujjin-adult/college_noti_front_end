@@ -1,8 +1,10 @@
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useFonts } from "expo-font";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Dimensions,
   Image,
   Text,
@@ -10,11 +12,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { signUpWithEmail } from "../../services/authAPI";
 
 type RootStackParamList = {
   Login: undefined;
   EnterEmail: undefined;
-  EnterPw: undefined;
+  EnterPw: { email: string; name: string; studentId: string };
   Home: undefined;
   Detail: undefined;
   Search: undefined;
@@ -28,11 +31,16 @@ type EnterPwScreenNavigationProp = NativeStackNavigationProp<
   "EnterPw"
 >;
 
+type EnterPwScreenRouteProp = RouteProp<RootStackParamList, "EnterPw">;
+
 export default function EnterPw() {
   const navigation = useNavigation<EnterPwScreenNavigationProp>();
+  const route = useRoute<EnterPwScreenRouteProp>();
+  const { email, name, studentId } = route.params;
   const { width } = Dimensions.get("window");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
@@ -45,14 +53,48 @@ export default function EnterPw() {
 
   if (!fontsLoaded) return null;
 
-  const handleContinue = () => {
-    if (password !== confirmPassword) {
-      alert("비밀번호가 일치하지 않습니다.");
+  const handleContinue = async () => {
+    if (!password) {
+      Alert.alert("오류", "비밀번호를 입력해주세요.");
       return;
     }
-    console.log("비밀번호 설정:", password);
-    // 회원가입 완료 후 로그인 화면으로 이동
-    navigation.navigate("Login");
+    if (password.length < 6) {
+      Alert.alert("오류", "비밀번호는 6자 이상이어야 합니다.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert("오류", "비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Firebase 회원가입 (displayName에 이름과 학번 포함)
+      const displayName = `${name} (${studentId})`;
+      const result = await signUpWithEmail(email, password, displayName);
+
+      if (result.success) {
+        Alert.alert("회원가입 완료", result.message, [
+          {
+            text: "확인",
+            onPress: () => {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "Login" }],
+              });
+            },
+          },
+        ]);
+      } else {
+        Alert.alert("회원가입 실패", result.message);
+      }
+    } catch (error) {
+      console.error("회원가입 오류:", error);
+      Alert.alert("오류", "회원가입 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -163,11 +205,12 @@ export default function EnterPw() {
         />
       </View>
 
-      {/* 계속하기 버튼 */}
+      {/* 회원가입 버튼 */}
       <TouchableOpacity
         onPress={handleContinue}
+        disabled={isLoading}
         style={{
-          backgroundColor: "#3366FF",
+          backgroundColor: isLoading ? "#99BBFF" : "#3366FF",
           borderRadius: 10,
           paddingVertical: 15,
           alignItems: "center",
@@ -175,15 +218,19 @@ export default function EnterPw() {
           marginTop: 10,
         }}
       >
-        <Text
-          style={{
-            fontFamily: "Pretendard-Bold",
-            fontSize: 16,
-            color: "#FFFFFF",
-          }}
-        >
-          계속하기
-        </Text>
+        {isLoading ? (
+          <ActivityIndicator color="#FFFFFF" />
+        ) : (
+          <Text
+            style={{
+              fontFamily: "Pretendard-Bold",
+              fontSize: 16,
+              color: "#FFFFFF",
+            }}
+          >
+            회원가입
+          </Text>
+        )}
       </TouchableOpacity>
 
       {/* 하단 문구 */}

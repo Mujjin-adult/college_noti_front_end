@@ -3,6 +3,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useFonts } from "expo-font";
 import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Dimensions,
   Image,
@@ -13,6 +14,9 @@ import {
   View,
 } from "react-native";
 import { getToken, messaging } from "../../config/firebaseConfig";
+import { signInWithEmail } from "../../services/authAPI";
+import { TokenService } from "../../services/tokenService";
+import { api } from "../../services/apiClient";
 
 type RootStackParamList = {
   Login: undefined;
@@ -36,6 +40,7 @@ export default function LoginMain() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fcmToken, setFcmToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
@@ -86,13 +91,57 @@ export default function LoginMain() {
 
   if (!fontsLoaded) return null;
 
-  const handleLogin = () => {
-    console.log("로그인 시도:", email, password);
-    console.log("FCM 토큰:", fcmToken);
-    // 여기서 FCM 토큰을 서버로 함께 전송
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("오류", "이메일과 비밀번호를 입력해주세요.");
+      return;
+    }
 
-    // 로그인 성공 시 Home 화면으로 이동
-    navigation.navigate("Home");
+    setIsLoading(true);
+
+    try {
+      // 1. Firebase 인증 (이메일 인증 건너뛰기)
+      const firebaseResult = await signInWithEmail(email, password, true);
+
+      if (!firebaseResult.success) {
+        Alert.alert("로그인 실패", firebaseResult.message);
+        return;
+      }
+
+      console.log("Firebase 로그인 성공:", firebaseResult.user);
+
+      // 2. 백엔드 API로 JWT 토큰 받기 (선택적)
+      try {
+        const backendLoginResponse = await api.login({
+          email: email,
+          password: password,
+          fcmToken: fcmToken || undefined,
+        });
+
+        const loginData = backendLoginResponse.data.data;
+
+        if (loginData?.accessToken) {
+          // 3. JWT 토큰 저장
+          await TokenService.saveToken(loginData.accessToken);
+          if (loginData.refreshToken) {
+            await TokenService.saveRefreshToken(loginData.refreshToken);
+          }
+          console.log("JWT 토큰 저장 완료");
+        }
+      } catch (backendError: any) {
+        // 백엔드 로그인 실패해도 Firebase 인증 성공했으면 계속 진행
+        console.warn("백엔드 로그인 오류 (Firebase 인증으로 계속):", backendError.message);
+      }
+
+      // 4. 홈 화면으로 이동 (Firebase 인증 성공 시)
+      console.log("FCM 토큰:", fcmToken);
+      navigation.navigate("Home");
+    } catch (error) {
+      console.error("로그인 오류:", error);
+      Alert.alert("오류", "로그인 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSignUp = () => {
@@ -200,23 +249,28 @@ export default function LoginMain() {
       {/* 시작하기 버튼 */}
       <TouchableOpacity
         onPress={handleLogin}
+        disabled={isLoading}
         style={{
-          backgroundColor: "#3366FF",
+          backgroundColor: isLoading ? "#99BBFF" : "#3366FF",
           borderRadius: 10,
           paddingVertical: 15,
           alignItems: "center",
           marginBottom: 20,
         }}
       >
-        <Text
-          style={{
-            fontFamily: "Pretendard-Bold",
-            fontSize: 16,
-            color: "#FFFFFF",
-          }}
-        >
-          시작하기
-        </Text>
+        {isLoading ? (
+          <ActivityIndicator color="#FFFFFF" />
+        ) : (
+          <Text
+            style={{
+              fontFamily: "Pretendard-Bold",
+              fontSize: 16,
+              color: "#FFFFFF",
+            }}
+          >
+            시작하기
+          </Text>
+        )}
       </TouchableOpacity>
 
       {/* 계정 생성 안내 */}

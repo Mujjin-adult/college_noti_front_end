@@ -17,7 +17,48 @@ import {
 import { Swipeable } from "react-native-gesture-handler";
 import { getNotices, Notice } from "../../services/crawlerAPI";
 
-export default function MainContents() {
+// 목데이터 (API 실패 시 사용)
+const MOCK_NOTICES: Notice[] = [
+  {
+    id: "mock-1",
+    title: "[학사] 2025학년도 1학기 수강신청 안내",
+    content: "2025학년도 1학기 수강신청 일정 및 유의사항을 안내드립니다.\n\n1. 수강신청 기간: 2025.02.24(월) ~ 02.28(금)\n2. 수강정정 기간: 2025.03.03(월) ~ 03.07(금)\n\n자세한 내용은 학사공지를 확인해주세요.",
+    categoryCode: "학사",
+    publishedAt: new Date().toISOString(),
+    viewCount: 1234,
+    isImportant: true,
+    author: "학사팀",
+    url: "https://www.inu.ac.kr/ite/3472/subview.do?enc=Zm5jdDF8QEB8JTJGYmJzJTJGaXRlJTJGMzczJTJGNDE0OTAxJTJGYXJ0Y2xWaWV3LmRvJTNG",
+  },
+  {
+    id: "mock-2",
+    title: "[장학금] 2025-1학기 교내장학금 신청 안내",
+    content: "2025학년도 1학기 교내장학금 신청 안내입니다.\n\n신청기간: 2025.02.17(월) ~ 02.21(금)\n신청방법: 포털시스템 > 장학금 신청",
+    categoryCode: "장학금",
+    publishedAt: new Date(Date.now() - 86400000).toISOString(), // 하루 전
+    viewCount: 856,
+    isImportant: false,
+    author: "장학팀",
+    url: "https://www.inu.ac.kr/ite/3472/subview.do",
+  },
+  {
+    id: "mock-3",
+    title: "[일반] 2025년 캠퍼스 축제 자원봉사자 모집",
+    content: "2025년 봄 캠퍼스 축제 자원봉사자를 모집합니다.\n\n모집기간: 2025.03.01 ~ 03.15\n활동기간: 2025.05.15 ~ 05.17",
+    categoryCode: "일반/행사/모집",
+    publishedAt: new Date(Date.now() - 172800000).toISOString(), // 이틀 전
+    viewCount: 423,
+    isImportant: false,
+    author: "학생처",
+  },
+];
+
+interface MainContentsProps {
+  category?: string;
+  onCategoriesExtracted?: (categories: string[]) => void;
+}
+
+export default function MainContents({ category, onCategoriesExtracted }: MainContentsProps) {
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
     "Pretendard-ExtraBold": require("../../assets/fonts/Pretendard-ExtraBold.ttf"),
@@ -30,26 +71,60 @@ export default function MainContents() {
   const [readTitles, setReadTitles] = useState<string[]>([]);
   const [bookmarkedItems, setBookmarkedItems] = useState<string[]>([]);
   const swipeRefs = useRef<{ [key: string]: Swipeable | null }>({});
-  const [notices, setNotices] = useState<Notice[]>([]);
+  const [allNotices, setAllNotices] = useState<Notice[]>([]); // 전체 공지사항
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  // 공지사항 데이터 가져오기
+  // 전체 공지사항 데이터 가져오기
   const fetchNotices = async () => {
     setIsLoading(true);
     try {
-      const result = await getNotices(1, 50); // 페이지 1, 50개 항목
-      if (result.success) {
-        setNotices(result.data);
+      const result = await getNotices(1, 100); // 카테고리 없이 전체 조회
+      if (result.success && result.data.length > 0) {
+        setAllNotices(result.data);
+
+        // 실제 존재하는 카테고리 추출
+        const uniqueCategories = Array.from(
+          new Set(
+            result.data
+              .map((notice: Notice) => notice.categoryCode || notice.category)
+              .filter(Boolean) // null/undefined 제거
+          )
+        ) as string[];
+
+        // 카테고리 목록을 상위 컴포넌트로 전달
+        onCategoriesExtracted?.(uniqueCategories);
       } else {
-        console.error("공지사항 조회 실패:", result.message);
+        // API 실패 또는 데이터 없음 - 목데이터 사용
+        console.warn("공지사항 조회 실패, 목데이터 사용:", result.message);
+        setAllNotices(MOCK_NOTICES);
+
+        // 목데이터에서 카테고리 추출
+        const mockCategories = Array.from(
+          new Set(MOCK_NOTICES.map((n) => n.categoryCode).filter(Boolean))
+        ) as string[];
+        onCategoriesExtracted?.(mockCategories);
       }
     } catch (error) {
-      console.error("공지사항 조회 오류:", error);
+      // 오류 발생 시 목데이터 사용
+      console.error("공지사항 조회 오류, 목데이터 사용:", error);
+      setAllNotices(MOCK_NOTICES);
+
+      const mockCategories = Array.from(
+        new Set(MOCK_NOTICES.map((n) => n.categoryCode).filter(Boolean))
+      ) as string[];
+      onCategoriesExtracted?.(mockCategories);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // 카테고리별로 필터링된 공지사항
+  const notices = category
+    ? allNotices.filter(notice =>
+        notice.categoryCode === category || notice.category === category
+      )
+    : allNotices;
 
   // 새로고침
   const onRefresh = async () => {
@@ -71,7 +146,7 @@ export default function MainContents() {
         setBookmarkedItems(JSON.parse(storedBookmarks));
       }
 
-      // 공지사항 불러오기
+      // 전체 공지사항 불러오기 (1회만)
       await fetchNotices();
     };
     loadData();
@@ -195,22 +270,26 @@ export default function MainContents() {
 
   const dates = Object.keys(groupedNotices).sort((a, b) => b.localeCompare(a)); // 최신 날짜순
 
+  // 첫 로딩 중일 때만 로딩 화면 표시
+  if (isLoading && allNotices.length === 0) {
+    return (
+      <View style={{ flex: 1, backgroundColor: "white", justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#3366FF" />
+        <Text style={{ fontFamily: "Pretendard-Regular", fontSize: 14, marginTop: 10 }}>
+          공지사항을 불러오는 중...
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
-      {isLoading && notices.length === 0 ? (
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <ActivityIndicator size="large" color="#3366FF" />
-          <Text style={{ fontFamily: "Pretendard-Regular", fontSize: 14, marginTop: 10 }}>
-            공지사항을 불러오는 중...
-          </Text>
-        </View>
-      ) : (
-        <ScrollView
-          contentContainerStyle={{ paddingBottom: 0 }}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-        >
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 0 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
           {dates.map((date) => {
             return (
               <View key={date}>
@@ -368,15 +447,14 @@ export default function MainContents() {
             );
           })}
 
-          {notices.length === 0 && !isLoading && (
-            <View style={{ flex: 1, justifyContent: "center", alignItems: "center", marginTop: 100 }}>
-              <Text style={{ fontFamily: "Pretendard-Light", fontSize: 16, color: "#999" }}>
-                공지사항이 없습니다
-              </Text>
-            </View>
-          )}
-        </ScrollView>
-      )}
+        {notices.length === 0 && !isLoading && (
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center", marginTop: 100 }}>
+            <Text style={{ fontFamily: "Pretendard-Light", fontSize: 16, color: "#999" }}>
+              공지사항이 없습니다
+            </Text>
+          </View>
+        )}
+      </ScrollView>
     </View>
   );
 }

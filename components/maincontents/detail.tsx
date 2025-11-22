@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRoute } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Image, Linking, ScrollView, Share, Text, TouchableOpacity, View } from "react-native";
+import { WebView } from "react-native-webview";
 import { Notice, getNoticeDetail } from "../../services/crawlerAPI";
 
 export default function Detail() {
@@ -11,6 +12,8 @@ export default function Detail() {
   const [bookmarkedTitles, setBookmarkedTitles] = useState<string[]>([]);
   const [notice, setNotice] = useState<Notice | null>(params?.notice || null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showWebView, setShowWebView] = useState(false);
+  const [webViewLoading, setWebViewLoading] = useState(true);
 
   // 공지사항 상세 정보 불러오기
   const fetchNoticeDetail = async (id: string) => {
@@ -156,6 +159,118 @@ export default function Detail() {
     );
   }
 
+  // WebView 모드
+  if (showWebView && notice?.url) {
+    return (
+      <View style={{ flex: 1, backgroundColor: "white" }}>
+        {/* 상단 헤더 */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingHorizontal: 15,
+            paddingVertical: 12,
+            borderBottomWidth: 1,
+            borderBottomColor: "#e0e0e0",
+            backgroundColor: "#fff",
+          }}
+        >
+          <TouchableOpacity onPress={() => setShowWebView(false)}>
+            <Text
+              style={{
+                fontFamily: "Pretendard-Bold",
+                fontSize: 14,
+                color: "#3366FF",
+              }}
+            >
+              ← 돌아가기
+            </Text>
+          </TouchableOpacity>
+          <Text
+            style={{
+              fontFamily: "Pretendard-Regular",
+              fontSize: 12,
+              color: "#666",
+              flex: 1,
+              textAlign: "center",
+              marginHorizontal: 10,
+            }}
+            numberOfLines={1}
+          >
+            {notice.title}
+          </Text>
+          <TouchableOpacity
+            onPress={async () => {
+              try {
+                await Linking.openURL(notice.url!);
+              } catch (error) {
+                console.error("URL 열기 오류:", error);
+              }
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Pretendard-Bold",
+                fontSize: 14,
+                color: "#3366FF",
+              }}
+            >
+              브라우저
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* WebView 로딩 인디케이터 */}
+        {webViewLoading && (
+          <View
+            style={{
+              position: "absolute",
+              top: 60,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "white",
+              zIndex: 10,
+            }}
+          >
+            <ActivityIndicator size="large" color="#3366FF" />
+            <Text
+              style={{
+                fontFamily: "Pretendard-Regular",
+                fontSize: 14,
+                marginTop: 10,
+                color: "#666",
+              }}
+            >
+              페이지 로딩 중...
+            </Text>
+          </View>
+        )}
+
+        {/* WebView */}
+        <WebView
+          source={{ uri: notice.url }}
+          style={{ flex: 1 }}
+          onLoadStart={() => setWebViewLoading(true)}
+          onLoadEnd={() => setWebViewLoading(false)}
+          onError={(syntheticEvent) => {
+            const { nativeEvent } = syntheticEvent;
+            console.error("WebView 오류:", nativeEvent);
+            setWebViewLoading(false);
+          }}
+          javaScriptEnabled={true}
+          domStorageEnabled={true}
+          startInLoadingState={true}
+          scalesPageToFit={true}
+        />
+      </View>
+    );
+  }
+
+  // 기본 상세 화면
   return (
     <ScrollView
       style={{
@@ -377,7 +492,7 @@ export default function Detail() {
           </View>
         )}
 
-        {/* 원문 보기 */}
+        {/* 원문 보기 버튼 */}
         {notice.url && (
           <TouchableOpacity
             style={{
@@ -388,19 +503,7 @@ export default function Detail() {
               backgroundColor: "#3366FF",
               borderRadius: 8,
             }}
-            onPress={async () => {
-              try {
-                const supported = await Linking.canOpenURL(notice.url!);
-                if (supported) {
-                  await Linking.openURL(notice.url!);
-                } else {
-                  alert("링크를 열 수 없습니다.");
-                }
-              } catch (error) {
-                console.error("URL 열기 오류:", error);
-                alert("링크를 여는 중 오류가 발생했습니다.");
-              }
-            }}
+            onPress={() => setShowWebView(true)}
           >
             <Text
               style={{
@@ -410,7 +513,7 @@ export default function Detail() {
                 textAlign: "center",
               }}
             >
-              원문 보기
+              원문 보기 (WebView)
             </Text>
           </TouchableOpacity>
         )}
