@@ -1,8 +1,8 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRoute } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Image, Linking, Platform, ScrollView, Share, Text, TouchableOpacity, View } from "react-native";
 import { Notice, getNoticeDetail } from "../../services/crawlerAPI";
+import { useBookmark } from "../../context/BookmarkContext";
 
 // 네이티브 플랫폼에서만 WebView 사용
 let WebView: any = null;
@@ -14,13 +14,13 @@ export default function Detail() {
   const route = useRoute();
   const params = route.params as { notice?: Notice } | undefined;
 
-  const [bookmarkedTitles, setBookmarkedTitles] = useState<string[]>([]);
+  const { isBookmarked, toggleBookmark } = useBookmark();
   const [notice, setNotice] = useState<Notice | null>(params?.notice || null);
   const [isLoading, setIsLoading] = useState(false);
   const [showWebView, setShowWebView] = useState(false);
   const [webViewLoading, setWebViewLoading] = useState(true);
 
-  // 공지사항 상세 정보 불러오기
+  // 공지사항 상세 정보 불러오기 (API 사용)
   const fetchNoticeDetail = async (id: string) => {
     setIsLoading(true);
     try {
@@ -36,43 +36,18 @@ export default function Detail() {
   };
 
   useEffect(() => {
-    const loadBookmarks = async () => {
-      try {
-        const saved = await AsyncStorage.getItem("bookmarkedTitles");
-        if (saved) {
-          setBookmarkedTitles(JSON.parse(saved));
-        }
-      } catch (error) {
-        console.error("북마크 불러오기 오류:", error);
-      }
-    };
-    loadBookmarks();
-
-    // 상세 정보 불러오기 (필요한 경우)
+    // content가 없으면 API로 상세 조회
     if (notice && !notice.content) {
       fetchNoticeDetail(notice.id);
     }
   }, []);
 
-  const handleBookmark = async (title: string) => {
+  const handleBookmark = async () => {
+    if (!notice) return;
     try {
-      let updatedBookmarks;
-
-      if (bookmarkedTitles.includes(title)) {
-        // 북마크 제거
-        updatedBookmarks = bookmarkedTitles.filter((t) => t !== title);
-        alert("북마크에서 제거되었습니다.");
-      } else {
-        // 북마크 추가
-        updatedBookmarks = [...bookmarkedTitles, title];
-        alert("북마크에 추가되었습니다.");
-      }
-
-      setBookmarkedTitles(updatedBookmarks);
-      await AsyncStorage.setItem(
-        "bookmarkedTitles",
-        JSON.stringify(updatedBookmarks)
-      );
+      const wasBookmarked = isBookmarked(notice.id);
+      await toggleBookmark(notice);
+      alert(wasBookmarked ? "북마크에서 제거되었습니다." : "북마크에 추가되었습니다.");
     } catch (error) {
       console.error("북마크 처리 중 오류:", error);
     }
@@ -90,7 +65,8 @@ export default function Detail() {
     }
   };
 
-  const swipe = (title: string) => {
+  const swipe = () => {
+    if (!notice) return null;
     return (
       <TouchableOpacity
         style={{
@@ -101,7 +77,7 @@ export default function Detail() {
           borderRadius: 12,
           marginRight: 0,
         }}
-        onPress={() => handleShare(title)}
+        onPress={() => handleShare(notice.title)}
       >
         {/* 북마크 아이콘 */}
         <TouchableOpacity
@@ -112,12 +88,12 @@ export default function Detail() {
           }}
           onPress={(e) => {
             e.stopPropagation();
-            handleBookmark(title);
+            handleBookmark();
           }}
         >
           <Image
             source={
-              bookmarkedTitles.includes(title)
+              isBookmarked(notice.id)
                 ? require("../../assets/images/bookmark2.png")
                 : require("../../assets/images/bookmark.png")
             }
@@ -278,6 +254,34 @@ export default function Detail() {
               domStorageEnabled={true}
               startInLoadingState={true}
               scalesPageToFit={true}
+              originWhitelist={["*"]}
+              // iOS: 파일 다운로드 링크 감지
+              onShouldStartLoadWithRequest={(request: any) => {
+                const url = request.url;
+                if (url.match(/\.(pdf|hwp|hwpx|doc|docx|xls|xlsx|ppt|pptx|zip|rar|7z|png|jpg|jpeg|gif)(\?.*)?$/i)) {
+                  Linking.openURL(url);
+                  return false;
+                }
+                if (url.includes("download") || url.includes("fileDown") || url.includes("attachFile") || url.includes("atchmnfl")) {
+                  Linking.openURL(url);
+                  return false;
+                }
+                return true;
+              }}
+              // Android: URL 변경 감지
+              onNavigationStateChange={(navState: any) => {
+                const url = navState.url;
+                if (url.match(/\.(pdf|hwp|hwpx|doc|docx|xls|xlsx|ppt|pptx|zip|rar|7z)(\?.*)?$/i)) {
+                  Linking.openURL(url);
+                }
+                if (url.includes("download") || url.includes("fileDown") || url.includes("attachFile") || url.includes("atchmnfl")) {
+                  Linking.openURL(url);
+                }
+              }}
+              // Android: Blob/다운로드 URL 처리
+              onFileDownload={({ nativeEvent }: any) => {
+                Linking.openURL(nativeEvent.downloadUrl);
+              }}
             />
           )
         )}
@@ -376,10 +380,10 @@ export default function Detail() {
             alignItems: "center",
           }}
         >
-          <TouchableOpacity onPress={() => handleBookmark(notice.title)}>
+          <TouchableOpacity onPress={() => handleBookmark()}>
             <Image
               source={
-                bookmarkedTitles.includes(notice.title)
+                isBookmarked(notice.id)
                   ? require("../../assets/images/bookmark2.png")
                   : require("../../assets/images/bookmark.png")
               }
@@ -411,17 +415,6 @@ export default function Detail() {
           marginBottom: 40,
         }}
       >
-        <Text
-          style={{
-            fontFamily: "Pretendard-Bold",
-            fontSize: 20,
-            marginLeft: 15,
-            marginRight: 15,
-            marginBottom: 20,
-          }}
-        >
-          {notice.title}
-        </Text>
         <Text
           style={{
             fontFamily: "Pretendard-regular",

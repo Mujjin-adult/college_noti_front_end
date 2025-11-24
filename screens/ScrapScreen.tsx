@@ -3,9 +3,11 @@ import { StyleSheet, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../App";
+import { useBookmark } from "../context/BookmarkContext";
 
 // 메인 콘텐츠
 import EmptyScrap from "@/components/maincontents/emptyScrap";
+import ScrapList from "@/components/maincontents/scrapList";
 
 // 상단 탭바
 import Header from "@/components/topmenu/header";
@@ -19,6 +21,7 @@ type ScrapScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, '
 export default function ScrapScreen() {
   const navigation = useNavigation<ScrapScreenNavigationProp>();
   const [activeTab, setActiveTab] = useState<number>(1); // 관심공지 탭 활성화
+  const { bookmarkedNotices } = useBookmark();
 
   const handleTabPress = (index: number) => {
     setActiveTab(index);
@@ -46,7 +49,7 @@ export default function ScrapScreen() {
     <View style={styles.container}>
       <Header />
       <Scrap />
-      <EmptyScrap />
+      {bookmarkedNotices.length > 0 ? <ScrapList /> : <EmptyScrap />}
       <BottomBar onTabPress={handleTabPress} activeTab={1} />
     </View>
   );

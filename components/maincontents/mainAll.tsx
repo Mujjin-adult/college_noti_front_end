@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { getNotices, Notice } from "../../services/crawlerAPI";
+import { useBookmark } from "../../context/BookmarkContext";
 
 // 목데이터 (API 실패 시 사용)
 const MOCK_NOTICES: Notice[] = [
@@ -51,6 +52,17 @@ const MOCK_NOTICES: Notice[] = [
     isImportant: false,
     author: "학생처",
   },
+  {
+    id: "mock-4",
+    title: "[사회봉사센터] 2025 사랑의 김장나눔 봉사자 모집(~11/4)",
+    content: "인천대학교 사회봉사센터에서 신체적·경제적 어려움으로 겨울철 준비가 어려운 지역사회 소외계층을 돕기 위해 김장 나눔 봉사활동을 모집합니다.\n\n■ 활동일: 2025년 11월 21일 (9:50~14:00)\n■ 장소: 제1기숙사식당\n■ 모집인원: 약 40명\n■ 활동내용: 인천광역시 노인보호전문기관 및 학대피해노인쉼터를 위한 김장 지원\n\n■ 일정\n- 장갑/앞치마 배부: 9:50~10:00\n- 김장: 10:00~13:00\n- 중식 제공: 13:00~14:00\n\n참가 신청은 Google Forms 링크를 통해 가능합니다.",
+    categoryCode: "봉사",
+    publishedAt: "2025-11-03T00:00:00.000Z",
+    viewCount: 1401,
+    isImportant: false,
+    author: "대학생활지원과",
+    url: "https://www.inu.ac.kr/bbs/inu/253/414577/artclView.do",
+  },
 ];
 
 interface MainContentsProps {
@@ -69,7 +81,7 @@ export default function MainContents({ category, onCategoriesExtracted }: MainCo
 
   const navi = useNavigation();
   const [readTitles, setReadTitles] = useState<string[]>([]);
-  const [bookmarkedItems, setBookmarkedItems] = useState<string[]>([]);
+  const { isBookmarked, toggleBookmark } = useBookmark();
   const swipeRefs = useRef<{ [key: string]: Swipeable | null }>({});
   const [allNotices, setAllNotices] = useState<Notice[]>([]); // 전체 공지사항
   const [isLoading, setIsLoading] = useState(false);
@@ -133,17 +145,12 @@ export default function MainContents({ category, onCategoriesExtracted }: MainCo
     setRefreshing(false);
   };
 
-  // 앱 시작 시 읽은 목록과 북마크 목록 불러오기 + 공지사항 불러오기
+  // 앱 시작 시 읽은 목록 불러오기 + 공지사항 불러오기
   useEffect(() => {
     const loadData = async () => {
       const storedRead = await AsyncStorage.getItem("readTitles");
       if (storedRead) {
         setReadTitles(JSON.parse(storedRead));
-      }
-
-      const storedBookmarks = await AsyncStorage.getItem("bookmarkedItems");
-      if (storedBookmarks) {
-        setBookmarkedItems(JSON.parse(storedBookmarks));
       }
 
       // 전체 공지사항 불러오기 (1회만)
@@ -166,25 +173,11 @@ export default function MainContents({ category, onCategoriesExtracted }: MainCo
     }
   };
 
-  const handleBookmark = async (uniqueKey: string) => {
+  const handleBookmark = async (notice: Notice) => {
     try {
-      let updatedBookmarks;
-
-      if (bookmarkedItems.includes(uniqueKey)) {
-        // 북마크 제거
-        updatedBookmarks = bookmarkedItems.filter((key) => key !== uniqueKey);
-        alert("북마크에서 제거되었습니다.");
-      } else {
-        // 북마크 추가
-        updatedBookmarks = [...bookmarkedItems, uniqueKey];
-        alert("북마크에 추가되었습니다.");
-      }
-
-      setBookmarkedItems(updatedBookmarks);
-      await AsyncStorage.setItem(
-        "bookmarkedItems",
-        JSON.stringify(updatedBookmarks)
-      );
+      const wasBookmarked = isBookmarked(notice.id);
+      await toggleBookmark(notice);
+      alert(wasBookmarked ? "북마크에서 제거되었습니다." : "북마크에 추가되었습니다.");
     } catch (error) {
       console.error("북마크 처리 중 오류:", error);
     }
@@ -202,7 +195,7 @@ export default function MainContents({ category, onCategoriesExtracted }: MainCo
     }
   };
 
-  const swipe = (title: string, uniqueKey: string) => {
+  const swipe = (notice: Notice) => {
     return (
       <TouchableOpacity
         style={{
@@ -213,7 +206,7 @@ export default function MainContents({ category, onCategoriesExtracted }: MainCo
           borderRadius: 12,
           marginRight: 0,
         }}
-        onPress={() => handleShare(title)}
+        onPress={() => handleShare(notice.title)}
       >
         {/* 북마크 아이콘 */}
         <TouchableOpacity
@@ -224,12 +217,12 @@ export default function MainContents({ category, onCategoriesExtracted }: MainCo
           }}
           onPress={(e) => {
             e.stopPropagation();
-            handleBookmark(uniqueKey);
+            handleBookmark(notice);
           }}
         >
           <Image
             source={
-              bookmarkedItems.includes(uniqueKey)
+              isBookmarked(notice.id)
                 ? require("../../assets/images/bookmark2.png")
                 : require("../../assets/images/bookmark.png")
             }
@@ -318,7 +311,7 @@ export default function MainContents({ category, onCategoriesExtracted }: MainCo
                     return (
                       <Swipeable
                         key={swipeKey}
-                        renderRightActions={() => swipe(notice.title, swipeKey)}
+                        renderRightActions={() => swipe(notice)}
                         containerStyle={{ overflow: "visible" }}
                         friction={0.7}
                         rightThreshold={40}
@@ -430,7 +423,7 @@ export default function MainContents({ category, onCategoriesExtracted }: MainCo
                             <TouchableOpacity
                               onPress={(e) => {
                                 e.stopPropagation();
-                                handleBookmark(swipeKey);
+                                handleBookmark(notice);
                               }}
                               style={{
                                 padding: 10,
@@ -438,7 +431,7 @@ export default function MainContents({ category, onCategoriesExtracted }: MainCo
                             >
                               <Image
                                 source={
-                                  bookmarkedItems.includes(swipeKey)
+                                  isBookmarked(notice.id)
                                     ? require("../../assets/images/bookmark2.png")
                                     : require("../../assets/images/bookmark.png")
                                 }

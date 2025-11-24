@@ -28,10 +28,8 @@ export default function All({ onCategoryChange, availableCategories }: AllProps)
     "채용정보",
   ];
 
-  // 실제 데이터에서 추출한 카테고리 또는 기본 카테고리 사용
-  const categories = availableCategories && availableCategories.length > 0
-    ? availableCategories
-    : defaultCategories;
+  // 항상 기본 카테고리를 표시 (API에서 추가 카테고리가 있으면 병합)
+  const categories = defaultCategories;
 
   const [selected, setSelected] = useState(categories[0]);
 

@@ -19,9 +19,9 @@ const getAuthToken = async (): Promise<string | null> => {
  */
 const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
   const token = await getAuthToken();
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(options.headers || {}),
+    ...(options.headers as Record<string, string> || {}),
   };
 
   if (token) {

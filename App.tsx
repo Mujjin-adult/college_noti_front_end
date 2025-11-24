@@ -2,6 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { BookmarkProvider } from './context/BookmarkContext';
 
 // 화면 컴포넌트 import
 import LoginScreen from './screens/LoginScreen';
@@ -31,25 +32,27 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="Login"
-          screenOptions={{
-            headerShown: false,
-            animation: 'slide_from_right',
-          }}
-        >
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="EnterEmail" component={EnterEmailScreen} />
-          <Stack.Screen name="EnterPw" component={EnterPwScreen} />
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Detail" component={DetailScreen} />
-          <Stack.Screen name="Search" component={SearchScreen} />
-          <Stack.Screen name="Setting" component={SettingScreen} />
-          <Stack.Screen name="Alert" component={AlertScreen} />
-          <Stack.Screen name="Scrap" component={ScrapScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <BookmarkProvider>
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName="Login"
+            screenOptions={{
+              headerShown: false,
+              animation: 'slide_from_right',
+            }}
+          >
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="EnterEmail" component={EnterEmailScreen} />
+            <Stack.Screen name="EnterPw" component={EnterPwScreen} />
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Detail" component={DetailScreen} />
+            <Stack.Screen name="Search" component={SearchScreen} />
+            <Stack.Screen name="Setting" component={SettingScreen} />
+            <Stack.Screen name="Alert" component={AlertScreen} />
+            <Stack.Screen name="Scrap" component={ScrapScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </BookmarkProvider>
     </GestureHandlerRootView>
   );
 }
