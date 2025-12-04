@@ -1,8 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Notifications from "expo-notifications";
+import { Platform } from "react-native";
 
 const TOKEN_KEY = "authToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
 const USER_INFO_KEY = "userInfo";
+const FCM_TOKEN_KEY = "fcmToken";
+
 
 /**
  * 토큰 저장소 서비스

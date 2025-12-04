@@ -35,6 +35,9 @@ export default function EnterEmail() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [studentId, setStudentId] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [studentIdError, setStudentIdError] = useState("");
+  const [emailError, setEmailError] = useState("");
 
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
@@ -47,18 +50,40 @@ export default function EnterEmail() {
 
   if (!fontsLoaded) return null;
 
+  const validateName = (text: string) => {
+    if (!text) {
+      setNameError("이름을 입력해주세요.");
+      return false;
+    }
+    setNameError("");
+    return true;
+  };
+
+  const validateStudentId = (text: string) => {
+    if (!text) {
+      setStudentIdError("학번을 입력해주세요.");
+      return false;
+    }
+    setStudentIdError("");
+    return true;
+  };
+
+  const validateEmail = (text: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!text || !emailRegex.test(text)) {
+      setEmailError("유효한 이메일 주소를 입력해주세요.");
+      return false;
+    }
+    setEmailError("");
+    return true;
+  };
+
   const handleContinue = () => {
-    // 유효성 검사
-    if (!name) {
-      Alert.alert("오류", "이름을 입력해주세요.");
-      return;
-    }
-    if (!studentId) {
-      Alert.alert("오류", "학번을 입력해주세요.");
-      return;
-    }
-    if (!email || !email.includes("@")) {
-      Alert.alert("오류", "유효한 이메일 주소를 입력해주세요.");
+    const isNameValid = validateName(name);
+    const isStudentIdValid = validateStudentId(studentId);
+    const isEmailValid = validateEmail(email);
+
+    if (!isNameValid || !isStudentIdValid || !isEmailValid) {
       return;
     }
 
@@ -129,7 +154,7 @@ export default function EnterEmail() {
             fontFamily: "Pretendard-Regular",
             fontSize: 16,
             borderWidth: 1,
-            borderColor: "#DDDDDD",
+            borderColor: nameError ? "red" : "#DDDDDD",
             borderRadius: 10,
             paddingHorizontal: 15,
             paddingVertical: 12,
@@ -138,8 +163,14 @@ export default function EnterEmail() {
           placeholder="이름을 입력하세요"
           placeholderTextColor="#AAAAAA"
           value={name}
-          onChangeText={setName}
+          onChangeText={(text) => {
+            setName(text);
+            validateName(text);
+          }}
         />
+        {nameError ? (
+          <Text style={{ color: "red", marginTop: 5 }}>{nameError}</Text>
+        ) : null}
       </View>
 
       {/* 학번 입력칸 */}
@@ -159,7 +190,7 @@ export default function EnterEmail() {
             fontFamily: "Pretendard-Regular",
             fontSize: 16,
             borderWidth: 1,
-            borderColor: "#DDDDDD",
+            borderColor: studentIdError ? "red" : "#DDDDDD",
             borderRadius: 10,
             paddingHorizontal: 15,
             paddingVertical: 12,
@@ -168,9 +199,15 @@ export default function EnterEmail() {
           placeholder="학번을 입력하세요"
           placeholderTextColor="#AAAAAA"
           value={studentId}
-          onChangeText={setStudentId}
+          onChangeText={(text) => {
+            setStudentId(text);
+            validateStudentId(text);
+          }}
           keyboardType="number-pad"
         />
+        {studentIdError ? (
+          <Text style={{ color: "red", marginTop: 5 }}>{studentIdError}</Text>
+        ) : null}
       </View>
 
       {/* 이메일 입력칸 */}
@@ -190,7 +227,7 @@ export default function EnterEmail() {
             fontFamily: "Pretendard-Regular",
             fontSize: 16,
             borderWidth: 1,
-            borderColor: "#DDDDDD",
+            borderColor: emailError ? "red" : "#DDDDDD",
             borderRadius: 10,
             paddingHorizontal: 15,
             paddingVertical: 12,
@@ -199,10 +236,16 @@ export default function EnterEmail() {
           placeholder="이메일을 입력하세요"
           placeholderTextColor="#AAAAAA"
           value={email}
-          onChangeText={setEmail}
+          onChangeText={(text) => {
+            setEmail(text);
+            validateEmail(text);
+          }}
           keyboardType="email-address"
           autoCapitalize="none"
         />
+        {emailError ? (
+          <Text style={{ color: "red", marginTop: 5 }}>{emailError}</Text>
+        ) : null}
       </View>
 
       {/* 계속하기 버튼 */}

@@ -1,19 +1,27 @@
 import { useFonts } from "expo-font";
-import { useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
+type RootStackParamList = {
+  Alert: undefined;
+  [key: string]: any;
+};
 
 interface HeaderProps {
   showBackButton?: boolean;
   onAlertToggle?: () => void;
   onBackPress?: () => void;
+  isAlertOpen?: boolean;
 }
 
 export default function Header({
   showBackButton = false,
   onAlertToggle,
   onBackPress,
+  isAlertOpen = false,
 }: HeaderProps) {
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
     "Pretendard-ExtraBold": require("../../assets/fonts/Pretendard-ExtraBold.ttf"),
@@ -23,8 +31,6 @@ export default function Header({
   });
 
   const handleBellClick = () => {
-    console.log("Bell clicked!");
-    setIsAlertOpen(!isAlertOpen);
     if (onAlertToggle) {
       onAlertToggle();
     }

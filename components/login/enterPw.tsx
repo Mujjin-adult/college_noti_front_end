@@ -18,6 +18,7 @@ type RootStackParamList = {
   Login: undefined;
   EnterEmail: undefined;
   EnterPw: { email: string; name: string; studentId: string };
+  EmailVerification: { email: string };
   Home: undefined;
   Detail: undefined;
   Search: undefined;
@@ -40,6 +41,8 @@ export default function EnterPw() {
   const { width } = Dimensions.get("window");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const [fontsLoaded] = useFonts({
@@ -53,17 +56,53 @@ export default function EnterPw() {
 
   if (!fontsLoaded) return null;
 
+  const handlePasswordChange = (text: string) => {
+    setPassword(text);
+    if (text.length > 0 && text.length < 6) {
+      setPasswordError("비밀번호는 6자 이상이어야 합니다.");
+    } else {
+      setPasswordError("");
+    }
+    // Also validate the confirm password if it's not empty
+    if (confirmPassword) {
+      if (text !== confirmPassword) {
+        setConfirmPasswordError("비밀번호가 일치하지 않습니다.");
+      } else {
+        setConfirmPasswordError("");
+      }
+    }
+  };
+
+  const handleConfirmPasswordChange = (text: string) => {
+    setConfirmPassword(text);
+    if (password !== text) {
+      setConfirmPasswordError("비밀번호가 일치하지 않습니다.");
+    } else {
+      setConfirmPasswordError("");
+    }
+  };
+
   const handleContinue = async () => {
+    // Manually trigger validation one last time before submitting
+    let isPasswordValid = false;
     if (!password) {
-      Alert.alert("오류", "비밀번호를 입력해주세요.");
-      return;
+      setPasswordError("비밀번호를 입력해주세요.");
+    } else if (password.length < 6) {
+      setPasswordError("비밀번호는 6자 이상이어야 합니다.");
+    } else {
+      setPasswordError("");
+      isPasswordValid = true;
     }
-    if (password.length < 6) {
-      Alert.alert("오류", "비밀번호는 6자 이상이어야 합니다.");
-      return;
-    }
+
+    let isConfirmPasswordValid = false;
     if (password !== confirmPassword) {
-      Alert.alert("오류", "비밀번호가 일치하지 않습니다.");
+      setConfirmPasswordError("비밀번호가 일치하지 않습니다.");
+    } else {
+      setConfirmPasswordError("");
+      isConfirmPasswordValid = true;
+    }
+
+    if (!isPasswordValid || !isConfirmPasswordValid) {
       return;
     }
 
@@ -75,17 +114,8 @@ export default function EnterPw() {
       const result = await signUpWithEmail(email, password, displayName);
 
       if (result.success) {
-        Alert.alert("회원가입 완료", result.message, [
-          {
-            text: "확인",
-            onPress: () => {
-              navigation.reset({
-                index: 0,
-                routes: [{ name: "Login" }],
-              });
-            },
-          },
-        ]);
+        // 회원가입 성공 시 이메일 인증 화면으로 이동
+        navigation.navigate("EmailVerification", { email });
       } else {
         Alert.alert("회원가입 실패", result.message);
       }
@@ -160,7 +190,7 @@ export default function EnterPw() {
             fontFamily: "Pretendard-Regular",
             fontSize: 16,
             borderWidth: 1,
-            borderColor: "#DDDDDD",
+            borderColor: passwordError ? "red" : "#DDDDDD",
             borderRadius: 10,
             paddingHorizontal: 15,
             paddingVertical: 12,
@@ -169,9 +199,12 @@ export default function EnterPw() {
           placeholder="비밀번호를 입력하세요"
           placeholderTextColor="#AAAAAA"
           value={password}
-          onChangeText={setPassword}
+          onChangeText={handlePasswordChange}
           secureTextEntry
         />
+        {passwordError ? (
+          <Text style={{ color: "red", marginTop: 5 }}>{passwordError}</Text>
+        ) : null}
       </View>
 
       {/* 비밀번호 확인 입력칸 */}
@@ -191,7 +224,7 @@ export default function EnterPw() {
             fontFamily: "Pretendard-Regular",
             fontSize: 16,
             borderWidth: 1,
-            borderColor: "#DDDDDD",
+            borderColor: confirmPasswordError ? "red" : "#DDDDDD",
             borderRadius: 10,
             paddingHorizontal: 15,
             paddingVertical: 12,
@@ -200,9 +233,14 @@ export default function EnterPw() {
           placeholder="비밀번호를 다시 입력하세요"
           placeholderTextColor="#AAAAAA"
           value={confirmPassword}
-          onChangeText={setConfirmPassword}
+          onChangeText={handleConfirmPasswordChange}
           secureTextEntry
         />
+        {confirmPasswordError ? (
+          <Text style={{ color: "red", marginTop: 5 }}>
+            {confirmPasswordError}
+          </Text>
+        ) : null}
       </View>
 
       {/* 회원가입 버튼 */}

@@ -11,16 +11,17 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { getToken, messaging } from "../../config/firebaseConfig";
+import { api } from "../../services/apiClient";
 import { signInWithEmail } from "../../services/authAPI";
 import { TokenService } from "../../services/tokenService";
-import { api } from "../../services/apiClient";
 
 type RootStackParamList = {
   Login: undefined;
   EnterEmail: undefined;
+  EmailVerification: { email: string };
   Home: undefined;
   Detail: undefined;
   Search: undefined;
@@ -41,6 +42,8 @@ export default function LoginMain() {
   const [password, setPassword] = useState("");
   const [fcmToken, setFcmToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const [fontsLoaded] = useFonts({
     "Pretendard-Bold": require("../../assets/fonts/Pretendard-Bold.ttf"),
@@ -92,19 +95,48 @@ export default function LoginMain() {
   if (!fontsLoaded) return null;
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("오류", "이메일과 비밀번호를 입력해주세요.");
+    let isValid = true;
+    if (!email) {
+      setEmailError("이메일을 입력해주세요.");
+      isValid = false;
+    }
+    if (!password) {
+      setPasswordError("비밀번호를 입력해주세요.");
+      isValid = false;
+    }
+
+    if (!isValid) {
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // 1. Firebase 인증 (이메일 인증 건너뛰기)
-      const firebaseResult = await signInWithEmail(email, password, true);
+      // 1. Firebase 인증 (이메일 인증 확인)
+      const firebaseResult = await signInWithEmail(email, password, false);
 
       if (!firebaseResult.success) {
+        // 이메일 인증이 필요한 경우
+        if (firebaseResult.emailVerified === false) {
+          Alert.alert(
+            "이메일 인증 필요",
+            "이메일 인증이 필요합니다. 인증 메일을 확인해주세요.",
+            [
+              {
+                text: "인증하기",
+                onPress: () => {
+                  navigation.navigate("EmailVerification", { email });
+                },
+              },
+              { text: "취소", style: "cancel" },
+            ]
+          );
+          setIsLoading(false);
+          return;
+        }
+
         Alert.alert("로그인 실패", firebaseResult.message);
+        setIsLoading(false);
         return;
       }
 
@@ -130,7 +162,10 @@ export default function LoginMain() {
         }
       } catch (backendError: any) {
         // 백엔드 로그인 실패해도 Firebase 인증 성공했으면 계속 진행
-        console.warn("백엔드 로그인 오류 (Firebase 인증으로 계속):", backendError.message);
+        console.warn(
+          "백엔드 로그인 오류 (Firebase 인증으로 계속):",
+          backendError.message
+        );
       }
 
       // 4. 홈 화면으로 이동 (Firebase 인증 성공 시)
@@ -200,7 +235,7 @@ export default function LoginMain() {
             fontFamily: "Pretendard-Regular",
             fontSize: 16,
             borderWidth: 1,
-            borderColor: "#DDDDDD",
+            borderColor: emailError ? "red" : "#DDDDDD",
             borderRadius: 10,
             paddingHorizontal: 15,
             paddingVertical: 12,
@@ -209,10 +244,16 @@ export default function LoginMain() {
           placeholder="이메일을 입력하세요"
           placeholderTextColor="#AAAAAA"
           value={email}
-          onChangeText={setEmail}
+          onChangeText={(text) => {
+            setEmail(text);
+            if (text) setEmailError("");
+          }}
           keyboardType="email-address"
           autoCapitalize="none"
         />
+        {emailError ? (
+          <Text style={{ color: "red", marginTop: 5 }}>{emailError}</Text>
+        ) : null}
       </View>
 
       {/* 비밀번호 입력칸 */}
@@ -232,7 +273,7 @@ export default function LoginMain() {
             fontFamily: "Pretendard-Regular",
             fontSize: 16,
             borderWidth: 1,
-            borderColor: "#DDDDDD",
+            borderColor: passwordError ? "red" : "#DDDDDD",
             borderRadius: 10,
             paddingHorizontal: 15,
             paddingVertical: 12,
@@ -241,9 +282,15 @@ export default function LoginMain() {
           placeholder="비밀번호를 입력하세요"
           placeholderTextColor="#AAAAAA"
           value={password}
-          onChangeText={setPassword}
+          onChangeText={(text) => {
+            setPassword(text);
+            if (text) setPasswordError("");
+          }}
           secureTextEntry
         />
+        {passwordError ? (
+          <Text style={{ color: "red", marginTop: 5 }}>{passwordError}</Text>
+        ) : null}
       </View>
 
       {/* 시작하기 버튼 */}

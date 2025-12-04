@@ -8,6 +8,7 @@ import { BookmarkProvider } from './context/BookmarkContext';
 import LoginScreen from './screens/LoginScreen';
 import EnterEmailScreen from './screens/EnterEmailScreen';
 import EnterPwScreen from './screens/EnterPwScreen';
+import EmailVerificationScreen from './screens/EmailVerificationScreen';
 import HomeScreen from './screens/HomeScreen';
 import DetailScreen from './screens/DetailScreen';
 import SearchScreen from './screens/SearchScreen';
@@ -19,6 +20,7 @@ export type RootStackParamList = {
   Login: undefined;
   EnterEmail: undefined;
   EnterPw: undefined;
+  EmailVerification: { email: string };
   Home: undefined;
   Detail: undefined;
   Search: undefined;
@@ -44,6 +46,7 @@ export default function App() {
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="EnterEmail" component={EnterEmailScreen} />
             <Stack.Screen name="EnterPw" component={EnterPwScreen} />
+            <Stack.Screen name="EmailVerification" component={EmailVerificationScreen} />
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="Detail" component={DetailScreen} />
             <Stack.Screen name="Search" component={SearchScreen} />
